@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Campaign - insyte</title>
+    <meta name="description" content="Create your influencer campaign in insyte, powered by QRaptor.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo"><i class="fas fa-robot"></i> insyte</a>
+            <ul class="nav-links">
+                <li><a href="/results">Find Influencers</a></li>
+                <li><a href="/campaign" class="active">Campaign Management</a></li>
+                <li><a href="/analysis">Campaign Analysis</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <section class="page-header fade-in-up">
+            <h1>Campaign Management</h1>
+            <p>View existing campaigns or create new ones. insyte will discover high‑fit influencers and manage outreach.</p>
+        </section>
+
+        <!-- Existing Campaigns Section -->
+        <section class="card fade-in-up">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-list"></i> Existing Campaigns
+                </h2>
+                <button type="button" class="btn" onclick="showCreateForm()">
+                    <i class="fas fa-plus"></i> Create New Campaign
+                </button>
+            </div>
+            <div id="campaignsList">
+                <div class="loading-container">
+                    <div class="loading"></div>
+                    <p>Loading campaigns...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create Campaign Form (Hidden by default) -->
+        <form id="campaignForm" class="campaign-form fade-in-up" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-flag"></i> Campaign Details</h2>
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label" for="campaign_name">Campaign Name *</label>
+                        <input class="form-input" id="campaign_name" name="campaign_name" placeholder="e.g., Summer Launch 2025" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="goal">Goal *</label>
+                        <select class="form-select" id="goal" name="goal" required>
+                            <option value="">Select goal...</option>
+                            <option>Brand Awareness</option>
+                            <option>Leads</option>
+                            <option>Sales</option>
+                            <option>UGC Creation</option>
+                            <option>App Installs</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label" for="target_audience">Target Audience *</label>
+                        <input class="form-input" id="target_audience" name="target_audience" placeholder="e.g., Gen Z, India, Tech‑savvy" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="brand_name">Brand Name *</label>
+                        <input class="form-input" id="brand_name" name="brand_name" placeholder="e.g., Insyte Labs" required>
+                    </div>
+                </div>
+                <div class="grid grid-3">
+                    <div class="form-group">
+                        <label class="form-label" for="niche">Niche *</label>
+                        <select class="form-select" id="niche" name="niche" required>
+                            <option value="">Select niche...</option>
+                            <option>Technology</option>
+                            <option>Fashion & Beauty</option>
+                            <option>Health & Wellness</option>
+                            <option>Lifestyle</option>
+                            <option>Business & Finance</option>
+                            <option>Gaming</option>
+                            <option>Food & Cooking</option>
+                            <option>Travel</option>
+                            <option>Fitness & Sports</option>
+                            <option>Education</option>
+                            <option>Entertainment</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="brand_website">Brand Website</label>
+                        <input class="form-input" id="brand_website" name="brand_website" placeholder="https://yourbrand.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="platform">Primary Platform *</label>
+                        <select class="form-select" id="platform" name="platform" required>
+                            <option value="">Select platform...</option>
+                            <option>Instagram</option>
+                            <option>YouTube</option>
+                            <option>LinkedIn</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label" for="budget">Budget (INR) *</label>
+                        <input class="form-input" id="budget" name="budget" type="number" min="0" step="100" placeholder="e.g., 5000" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Created On</label>
+                        <input class="form-input" value="Auto when created" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card submit-section">
+                <div class="submit-content">
+                    <div class="submit-info">
+                        <h3>Ready to launch?</h3>
+                        <p>insyte will generate brand‑fit insights and recommended creators.</p>
+                    </div>
+                    <div class="submit-actions">
+                        <button type="submit" class="btn btn-large"><i class="fas fa-rocket"></i> Create Campaign</button>
+                        <button type="button" class="btn btn-secondary" onclick="saveAsDraft()"><i class="fas fa-save"></i> Save Draft</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideCreateForm()"><i class="fas fa-arrow-left"></i> Back to Campaigns</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>insyte</h4>
+                <p>Influencer outreach & CRM agent</p>
+                <p>Powered by QRaptor</p>
+            </div>
+            <div class="footer-section">
+                <h4>Platform</h4>
+                <ul>
+                    <li><a href="/results">Find Influencers</a></li>
+                    <li><a href="/campaign">Campaign Management</a></li>
+                    <li><a href="/analysis">Campaign Analysis</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2025 insyte.</p></div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Campaign management functions
+        function showCreateForm() {
+            document.getElementById('campaignForm').style.display = 'block';
+            document.querySelector('.page-header').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function hideCreateForm() {
+            document.getElementById('campaignForm').style.display = 'none';
+            document.querySelector('.page-header').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function saveAsDraft(){
+            const data = new FormData(document.getElementById('campaignForm'));
+            const obj = {};
+            for(const [k,v] of data.entries()){ obj[k] = v }
+            localStorage.setItem('campaignDraft', JSON.stringify(obj));
+            showNotification('Draft saved', 'success');
+        }
+        
+        function loadCampaigns() {
+            const campaignsList = document.getElementById('campaignsList');
+            
+            fetch('/api/list_campaigns')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.campaigns) {
+                        displayCampaigns(data.campaigns);
+                    } else {
+                        campaignsList.innerHTML = '<p class="text-center">No campaigns found.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading campaigns:', error);
+                    campaignsList.innerHTML = '<p class="text-center text-error">Error loading campaigns. Please try again.</p>';
+                });
+        }
+        
+        function displayCampaigns(campaigns) {
+            const campaignsList = document.getElementById('campaignsList');
+            
+            if (campaigns.length === 0) {
+                campaignsList.innerHTML = '<p class="text-center">No campaigns found. Create your first campaign!</p>';
+                return;
+            }
+            
+            const campaignsGrid = document.createElement('div');
+            campaignsGrid.className = 'campaigns-grid';
+            
+            campaigns.forEach(campaign => {
+                const campaignCard = createCampaignCard(campaign);
+                campaignsGrid.appendChild(campaignCard);
+            });
+            
+            campaignsList.innerHTML = '';
+            campaignsList.appendChild(campaignsGrid);
+        }
+        
+        function createCampaignCard(campaign) {
+            const card = document.createElement('div');
+            card.className = 'campaign-card fade-in-up';
+            
+            const createdDate = campaign.created_on ? new Date(campaign.created_on).toLocaleDateString() : 'Not specified';
+            
+            card.innerHTML = `
+                <div class="campaign-header">
+                    <h3 class="campaign-name">${campaign.campaign_name || 'Unnamed Campaign'}</h3>
+                    <span class="campaign-id">#${campaign.campaign_id}</span>
+                </div>
+                <div class="campaign-details">
+                    <div class="campaign-info">
+                        <p><strong>Brand:</strong> ${campaign.brand_name || 'Not specified'}</p>
+                        <p><strong>Goal:</strong> ${campaign.goal || 'Not specified'}</p>
+                        <p><strong>Niche:</strong> ${campaign.niche || 'Not specified'}</p>
+                        <p><strong>Platform:</strong> ${campaign.platform || 'Not specified'}</p>
+                        <p><strong>Budget:</strong> ₹${campaign.budget || 'Not specified'}</p>
+                        <p><strong>Target Audience:</strong> ${campaign.target_audience || 'Not specified'}</p>
+                        <p><strong>Created:</strong> ${createdDate}</p>
+                    </div>
+                    <div class="campaign-actions">
+                        <button class="btn btn-secondary" onclick="viewCampaign(${campaign.campaign_id})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn" onclick="editCampaign(${campaign.campaign_id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        function viewCampaign(campaignId) {
+            // Navigate to results page with campaign ID
+            window.location.href = `/results?campaign_id=${campaignId}`;
+        }
+        
+        function editCampaign(campaignId) {
+            // TODO: Implement edit functionality
+            showNotification('Edit functionality coming soon!', 'info');
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#8b5cf6'};
+                color: white;
+                border-radius: 8px;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load existing campaigns
+            loadCampaigns();
+            
+            // Load draft if exists
+            const d = localStorage.getItem('campaignDraft');
+            if (d) {
+                const o = JSON.parse(d);
+                Object.keys(o).forEach(k => {
+                    const el = document.querySelector(`[name="${k}"]`);
+                    if (el) el.value = o[k];
+                });
+            }
+            
+            // Add form submit handler
+            document.getElementById('campaignForm').addEventListener('submit', handleCampaignSubmit);
+        });
+        
+        async function handleCampaignSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const payload = {};
+            
+            for (const [key, value] of formData.entries()) {
+                payload[key] = value;
+            }
+            
+            try {
+                const response = await fetch('/api/create_campaign', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Campaign created successfully!', 'success');
+                    
+                    // Clear form
+                    form.reset();
+                    
+                    // Clear draft
+                    localStorage.removeItem('campaignDraft');
+                    
+                    // Hide form and reload campaigns
+                    setTimeout(() => {
+                        hideCreateForm();
+                        loadCampaigns();
+                    }, 1500);
+                } else {
+                    showNotification(result.message || 'Failed to create campaign', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating campaign:', error);
+                showNotification('An error occurred while creating the campaign', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

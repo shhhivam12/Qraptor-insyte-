@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer Results - insyte</title>
+    <meta name="description" content="Discover influencers by brand fit, cost, and audience alignment.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo"><i class="fas fa-robot"></i> insyte</a>
+            <ul class="nav-links">
+                <li><a href="/results" class="active">Find Influencers</a></li>
+                <li><a href="/campaign">Campaign Management</a></li>
+                <li><a href="/analysis">Campaign Analysis</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <section class="page-header fade-in-up">
+            <h1>Influencers matched to your campaign</h1>
+            <p>Review brand fit, costs, and audience alignment. Add to campaign or contact directly.</p>
+        </section>
+
+        <section class="card search-filter fade-in-up">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-search"></i> Search & Filter</h2>
+            </div>
+            <form id="searchForm" class="search-form">
+                <div class="grid grid-3">
+                    <div class="form-group">
+                        <label class="form-label" for="campaignSelect">Campaign</label>
+                        <select class="form-select" id="campaignSelect" name="campaign_id" required>
+                            <option value="">Select a campaign...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="platform">Platform</label>
+                        <select class="form-select" id="platform" name="platform">
+                            <option value="">All</option>
+                            <option>Instagram</option>
+                            <option>YouTube</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="niche">Niche</label>
+                        <input class="form-input" id="niche" name="niche" placeholder="e.g., Technology">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Followers Range</label>
+                        <div style="display:flex;gap:.5rem;">
+                            <input class="form-input" name="followers_min" type="number" min="0" placeholder="Min">
+                            <input class="form-input" name="followers_max" type="number" min="0" placeholder="Max">
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-3">
+                    <div class="form-group">
+                        <label class="form-label" for="audience_age_range">Audience Age Range</label>
+                        <input class="form-input" id="audience_age_range" name="audience_age_range" placeholder="e.g., 18-24">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="audience_gender">Audience Gender</label>
+                        <select class="form-select" id="audience_gender" name="audience_gender">
+                            <option value="">Any</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Mixed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="audience_location">Audience Location</label>
+                        <input class="form-input" id="audience_location" name="audience_location" placeholder="e.g., India, US">
+                    </div>
+                </div>
+                <div class="search-actions">
+                    <button type="submit" class="btn"><i class="fas fa-search"></i> Search</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearFilters()"><i class="fas fa-times"></i> Clear</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card unified-results fade-in-up">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-users"></i> Influencer Results</h2>
+                <div class="table-actions">
+                    <button class="btn btn-secondary" onclick="addInfluencersToCampaign()"><i class="fas fa-plus"></i> Add Selected</button>
+                    <button class="btn" onclick="sendEmailsToInfluencers()"><i class="fas fa-envelope"></i> Contact Selected</button>
+                </div>
+            </div>
+            <div id="influencerResults" class="unified-influencer-grid"></div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>insyte</h4>
+                <p>Influencer outreach & CRM agent</p>
+                <p>Powered by QRaptor</p>
+            </div>
+            <div class="footer-section">
+                <h4>Platform</h4>
+                <ul>
+                    <li><a href="/results">Find Influencers</a></li>
+                    <li><a href="/campaign">Campaign Management</a></li>
+                    <li><a href="/analysis">Campaign Analysis</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2025 insyte.</p></div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Hook into existing displayInfluencers to use unified view
+        const _displayInfluencers = window.displayInfluencers;
+        window.displayInfluencers = function(infs){ 
+            _displayInfluencers(infs); 
+        };
+        function clearFilters(){ document.getElementById('searchForm').reset(); }
+    </script>
+</body>
+</html>
