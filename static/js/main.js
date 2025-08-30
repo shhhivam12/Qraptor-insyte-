@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeParallax();
     initializeInteractiveElements();
     initializeScrollAnimations();
+    initializeWorkflowSlider(); // Initialize workflow slider
 });
 
 // Ensure overlays are cleared after full window load as well
@@ -153,11 +154,12 @@ async function handleInfluencerSearch(event) {
         followers_max: formData.get('followers_max') || undefined,
         audience_age_range: formData.get('audience_age_range') || undefined,
         audience_gender: formData.get('audience_gender') || undefined,
-        audience_location: formData.get('audience_location') || undefined
+        audience_location: formData.get('audience_location') || undefined,
+        additional_notes: formData.get('additional_notes') || undefined
     };
 
     try {
-        showLoadingLong('🤖 AI is analyzing influencers... This may take 40-60 seconds.');
+        showLoadingLong('✨ AI is searching creators you\'d swipe right on...');
         const controller = new AbortController();
         const timeout = setTimeout(()=>controller.abort(), 45000);
         const response = await fetch('/api/fetch_influencers', {
@@ -171,6 +173,13 @@ async function handleInfluencerSearch(event) {
         if (result.success) {
             currentInfluencers = result.influencers;
             displayInfluencers(currentInfluencers);
+            // Hide filters, show results
+            const searchSection = document.getElementById('searchSection');
+            const resultsSection = document.getElementById('resultsSection');
+            if(searchSection && resultsSection){
+                searchSection.style.display = 'none';
+                resultsSection.style.display = '';
+            }
             showSuccess(`Found ${result.count} influencers`);
         } else {
             showError(result.message || 'Failed to fetch influencers');
@@ -195,7 +204,7 @@ function displayInfluencers(influencers) {
     }
     
     const grid = document.createElement('div');
-    grid.className = 'influencer-grid';
+    grid.className = 'unified-influencer-grid';
     
     influencers.forEach(influencer => {
         grid.appendChild(createInfluencerCard(influencer));
@@ -444,8 +453,17 @@ function toggleInfluencerSelection(influencerId) {
 }
 
 function contactInfluencer(influencerId) {
-    // Open contact modal or redirect to contact page
-    alert(`Contacting influencer ${influencerId}`);
+    try {
+        // Find influencer in current list
+        const inf = (currentInfluencers || []).find(x => String(x.id) === String(influencerId));
+        if (!inf) { showError('Influencer not found in current list'); return; }
+        const name = inf.name || inf.username || 'Creator';
+        const username = inf.username || inf.channel_id || '';
+        openEmailModal(name, username);
+    } catch (e) {
+        console.error('contactInfluencer error:', e);
+        showError('Failed to open email modal');
+    }
 }
 
 function formatNumber(num) {
@@ -556,9 +574,9 @@ function showLoadingLong(message = 'Working...'){
     const overlay = document.querySelector('#loadingOverlay .loading-content');
     if(overlay){
         overlay.innerHTML = `
-            <div class="loading" style="width:28px;height:28px;border-width:4px"></div>
+            <div class="loading" style="width:60px;height:60px;border-width:5px"></div>
             <p style="margin-top:.75rem;color:var(--text-primary)">${message}</p>
-            <p style="font-size:.9rem;color:var(--text-secondary)">Please wait, this can take 30-40 seconds.</p>
+            <p class="ai-copy">Like scrolling Insta to find that perfect vibe — hang tight ✨</p>
         `;
     }
 }
@@ -831,6 +849,17 @@ function initializeResultsPage() {
     }
 }
 
+// Toggle filters/results
+function showFilters(){
+    const searchSection = document.getElementById('searchSection');
+    const resultsSection = document.getElementById('resultsSection');
+    if(searchSection && resultsSection){
+        searchSection.style.display = '';
+        resultsSection.style.display = 'none';
+        searchSection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
 async function populateCampaignDropdown(){
     const select = document.getElementById('campaignSelect');
     if(!select) return;
@@ -871,6 +900,7 @@ function initializeAnalysisPage() {
 async function loadExistingInfluencers() {
     // Load existing influencers for the current campaign
     try {
+        console.log('Loading existing influencers for campaign:', currentCampaignId);
         const response = await fetch(`/api/fetch_campaign_data?campaign_id=${currentCampaignId}`);
         const result = await response.json();
         
@@ -909,6 +939,9 @@ window.toggleInfluencerSelection = toggleInfluencerSelection;
 window.handleIgTestSubmit = handleIgTestSubmit;
 window.addSingleInfluencer = addSingleInfluencer;
 window.viewProfile = viewProfile;
+window.populateCampaignDropdown = populateCampaignDropdown;
+window.newSlide = newSlide;
+window.goToSlide = goToSlide;
 
 // Add missing functions
 function addSingleInfluencer(influencerId) {
@@ -931,3 +964,95 @@ function viewProfile(username, platform) {
     }
     window.open(url, '_blank');
 }
+
+// Global open email modal function - works on all pages
+window.openEmailModal = async function(name, username) {
+    const modal = document.getElementById('emailModal');
+    if (!modal) {
+        showError('Email modal not found on page');
+        return;
+    }
+    
+    modal.classList.add('active');
+    
+    // Prefill via generator
+    try {
+        showLoading('Generating email draft...');
+        const resp = await fetch('/api/generate_email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                campaign_id: currentCampaignId || sessionStorage.getItem('currentCampaignId') || '',
+                influencer_name: name,
+                influencer_username: username || ''
+            })
+        });
+        const data = await resp.json();
+        if (data.success && data.email) {
+            const toEl = document.getElementById('email_to');
+            const subEl = document.getElementById('email_subject');
+            const bEl = document.getElementById('email_body');
+            const prevEl = document.getElementById('email_preview');
+            if (toEl) toEl.value = data.email.email || '';
+            if (subEl) subEl.value = data.email.subject || '';
+            if (bEl) bEl.value = data.email.body || '';
+            if (prevEl) prevEl.textContent = data.email.body || '';
+        } else {
+            showError(data.message || 'Failed to generate email');
+        }
+    } catch (e) {
+        console.error('Email generation error:', e);
+        showError('Failed to generate email');
+    } finally {
+        hideLoading();
+    }
+}
+
+// New Workflow Slider Functionality
+let currentSlideIndex = 0;
+const totalSlides = 6;
+
+function initializeWorkflowSlider() {
+    // Auto-advance slides every 4 seconds
+    setInterval(() => {
+        newSlide(1);
+    }, 4000);
+}
+
+function newSlide(direction) {
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.nav-dot');
+    
+    if (!slides.length) return;
+    
+    // Remove active class from current slide
+    slides[currentSlideIndex].classList.remove('active');
+    dots[currentSlideIndex].classList.remove('active');
+    
+    // Calculate new slide index
+    currentSlideIndex = (currentSlideIndex + direction + totalSlides) % totalSlides;
+    
+    // Add active class to new slide
+    slides[currentSlideIndex].classList.add('active');
+    dots[currentSlideIndex].classList.add('active');
+}
+
+function goToSlide(slideIndex) {
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.nav-dot');
+    
+    if (!slides.length) return;
+    
+    // Remove active class from current slide
+    slides[currentSlideIndex].classList.remove('active');
+    dots[currentSlideIndex].classList.remove('active');
+    
+    // Set new slide index
+    currentSlideIndex = slideIndex - 1;
+    
+    // Add active class to new slide
+    slides[currentSlideIndex].classList.add('active');
+    dots[currentSlideIndex].classList.add('active');
+}
+
+

@@ -15,12 +15,13 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="logo">
-                <i class="fas fa-robot"></i> insyte
+                <img src="{{ url_for('static', filename='images/main_logo.png') }}" alt="Insyte Logo" width="30%">
             </a>
             <ul class="nav-links">
                 <li><a href="/results">Find Influencers</a></li>
                 <li><a href="/campaign">Campaign Management</a></li>
                 <li><a class="active" href="/analysis">Campaign Analysis</a></li>
+                <li><a href="/super-manager" class="super-manager-link">Super Manager</a></li>
             </ul>
         </div>
     </nav>
@@ -33,343 +34,55 @@
             <p>AI-powered analysis of your campaign performance with actionable recommendations.</p>
         </section>
 
-        <!-- Campaign Overview -->
-        <section class="card campaign-overview fade-in-up">
+        <!-- Analysis Form -->
+        <section class="card analysis-form fade-in-up">
             <div class="card-header">
                 <h2 class="card-title">
-                    <i class="fas fa-chart-line"></i> Campaign Overview
+                    <i class="fas fa-search"></i> Campaign Analysis
                 </h2>
-                <div class="campaign-selector">
-                    <label for="campaignSelect" class="form-label">Select Campaign:</label>
-                    <select id="campaignSelect" class="form-select" onchange="loadCampaignData()">
-                        <option value="">Choose a campaign...</option>
-                        <option value="campaign1">Summer Product Launch 2024</option>
-                        <option value="campaign2">Holiday Collection</option>
-                        <option value="campaign3">Brand Awareness Q1</option>
+            </div>
+            <form id="analysisForm" class="analysis-form-content">
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label" for="campaignName">Campaign Name</label>
+                        <select class="form-select" id="campaignName" name="campaign_name" required>
+                            <option value="">Select a campaign...</option>
+                    </select>
+                </div>
+                    <div class="form-group">
+                        <label class="form-label" for="analysisType">Analysis Type</label>
+                        <select class="form-select" id="analysisType" name="analysis_type" required>
+                            <option value="">Select analysis type...</option>
+                            <option value="campaign_performance">Campaign Performance</option>
+                            <option value="influencer_performance">Influencer Performance</option>
+                            <option value="audience_insights">Audience Insights</option>
                     </select>
                 </div>
             </div>
-            
-            <div class="overview-grid">
-                <div class="overview-card">
-                    <div class="overview-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="overview-content">
-                        <div class="overview-value" id="totalInfluencers">0</div>
-                        <div class="overview-label">Total Influencers</div>
-                    </div>
-                </div>
-                
-                <div class="overview-card">
-                    <div class="overview-icon">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <div class="overview-content">
-                        <div class="overview-value" id="totalReach">0</div>
-                        <div class="overview-label">Total Reach</div>
-                    </div>
-                </div>
-                
-                <div class="overview-card">
-                    <div class="overview-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <div class="overview-content">
-                        <div class="overview-value" id="totalEngagement">0</div>
-                        <div class="overview-label">Total Engagement</div>
-                    </div>
-                </div>
-                
-                <div class="overview-card">
-                    <div class="overview-icon">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                    <div class="overview-content">
-                        <div class="overview-value" id="avgBrandFit">0%</div>
-                        <div class="overview-label">Avg Brand Fit</div>
-                    </div>
-                </div>
-                
-                <div class="overview-card">
-                    <div class="overview-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div class="overview-content">
-                        <div class="overview-value" id="emailsSent">0</div>
-                        <div class="overview-label">Emails Sent</div>
-                    </div>
-                </div>
-                
-                <div class="overview-card">
-                    <div class="overview-icon">
-                        <i class="fas fa-reply"></i>
-                    </div>
-                    <div class="overview-content">
-                        <div class="overview-value" id="responseRate">0%</div>
-                        <div class="overview-label">Response Rate</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Performance Charts -->
-        <section class="card performance-charts fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-chart-area"></i> Performance Trends
-                </h2>
-                <div class="chart-controls">
-                    <select id="timeRange" class="form-select" onchange="updateCharts()">
-                        <option value="7">Last 7 days</option>
-                        <option value="30" selected>Last 30 days</option>
-                        <option value="90">Last 90 days</option>
-                        <option value="365">Last year</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <h3>Engagement Over Time</h3>
-                    <canvas id="engagementChart"></canvas>
-                </div>
-                
-                <div class="chart-container">
-                    <h3>Reach Growth</h3>
-                    <canvas id="reachChart"></canvas>
-                </div>
-                
-                <div class="chart-container">
-                    <h3>Brand Fit Distribution</h3>
-                    <canvas id="brandFitChart"></canvas>
-                </div>
-                
-                <div class="chart-container">
-                    <h3>Platform Performance</h3>
-                    <canvas id="platformChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!-- AI Insights -->
-        <section class="card ai-insights fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-robot"></i> AI-Powered Insights
-                </h2>
-                <button class="btn btn-secondary" onclick="refreshInsights()">
-                    <i class="fas fa-sync"></i> Refresh Insights
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-large">
+                        <i class="fas fa-chart-line"></i> Analyze Campaign
                 </button>
             </div>
-            
-            <div class="insights-grid">
-                <div class="insight-card">
-                    <div class="insight-header">
-                        <i class="fas fa-lightbulb"></i>
-                        <h3>Top Performing Influencers</h3>
-                    </div>
-                    <div class="insight-content" id="topPerformers">
-                        <p>Loading insights...</p>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-header">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Areas for Improvement</h3>
-                    </div>
-                    <div class="insight-content" id="improvementAreas">
-                        <p>Loading insights...</p>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-header">
-                        <i class="fas fa-target"></i>
-                        <h3>Optimization Recommendations</h3>
-                    </div>
-                    <div class="insight-content" id="optimizationRecs">
-                        <p>Loading insights...</p>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-header">
-                        <i class="fas fa-chart-line"></i>
-                        <h3>ROI Analysis</h3>
-                    </div>
-                    <div class="insight-content" id="roiAnalysis">
-                        <p>Loading insights...</p>
-                    </div>
-                </div>
-            </div>
+            </form>
         </section>
 
-        <!-- Influencer Performance Table -->
-        <section class="card influencer-performance fade-in-up">
+        <!-- Analysis Results -->
+        <section id="analysisResults" class="card analysis-results fade-in-up" style="display: none;">
             <div class="card-header">
                 <h2 class="card-title">
-                    <i class="fas fa-table"></i> Influencer Performance Breakdown
+                    <i class="fas fa-chart-bar"></i> Analysis Results
                 </h2>
                 <div class="table-actions">
-                    <button class="btn btn-secondary" onclick="exportData()">
-                        <i class="fas fa-download"></i> Export Data
-                    </button>
-                    <button class="btn" onclick="generateReport()">
-                        <i class="fas fa-file-pdf"></i> Generate Report
+                    <button id="summaryBtn" class="btn btn-secondary" type="button">
+                        <i class="fas fa-wand-magic-sparkles"></i> Generate AI Summary
                     </button>
                 </div>
+                <div id="analysisSummary" class="card" style="display:none; margin: 1rem; padding: 1rem;"></div>
             </div>
+            <div id="analysisContent"></div>
             
-            <div class="table-container">
-                <table class="table" id="performanceTable">
-                    <thead>
-                        <tr>
-                            <th>Influencer</th>
-                            <th>Platform</th>
-                            <th>Followers</th>
-                            <th>Engagement Rate</th>
-                            <th>Brand Fit Score</th>
-                            <th>Content Quality</th>
-                            <th>Response Status</th>
-                            <th>Performance Grade</th>
-                        </tr>
-                    </thead>
-                    <tbody id="performanceTableBody">
-                        <!-- Performance data will be populated here -->
-                    </tbody>
-                </table>
-            </div>
         </section>
-
-        <!-- Campaign Comparison -->
-        <section class="card campaign-comparison fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-balance-scale"></i> Campaign Comparison
-                </h2>
-                <p>Compare performance across different campaigns and time periods</p>
-            </div>
-            
-            <div class="comparison-controls">
-                <div class="form-group">
-                    <label for="campaign1" class="form-label">Campaign 1</label>
-                    <select id="campaign1" class="form-select">
-                        <option value="campaign1">Summer Product Launch 2024</option>
-                        <option value="campaign2">Holiday Collection</option>
-                        <option value="campaign3">Brand Awareness Q1</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="campaign2" class="form-label">Campaign 2</label>
-                    <select id="campaign2" class="form-select">
-                        <option value="campaign2">Holiday Collection</option>
-                        <option value="campaign1">Summer Product Launch 2024</option>
-                        <option value="campaign3">Brand Awareness Q1</option>
-                    </select>
-                </div>
-                
-                <button class="btn" onclick="compareCampaigns()">
-                    <i class="fas fa-chart-bar"></i> Compare
-                </button>
-            </div>
-            
-            <div class="comparison-chart">
-                <canvas id="comparisonChart"></canvas>
-            </div>
-        </section>
-
-        <!-- Predictive Analytics -->
-        <section class="card predictive-analytics fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-crystal-ball"></i> Predictive Analytics
-                </h2>
-                <p>AI-powered predictions for future campaign performance</p>
-            </div>
-            
-            <div class="predictions-grid">
-                <div class="prediction-card">
-                    <div class="prediction-header">
-                        <i class="fas fa-calendar"></i>
-                        <h3>Next 30 Days</h3>
-                    </div>
-                    <div class="prediction-content">
-                        <div class="prediction-metric">
-                            <span class="metric-label">Expected Reach:</span>
-                            <span class="metric-value" id="predictedReach30">0</span>
-                        </div>
-                        <div class="prediction-metric">
-                            <span class="metric-label">Expected Engagement:</span>
-                            <span class="metric-value" id="predictedEngagement30">0</span>
-                        </div>
-                        <div class="prediction-metric">
-                            <span class="metric-label">Success Probability:</span>
-                            <span class="metric-value" id="successProb30">0%</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="prediction-card">
-                    <div class="prediction-header">
-                        <i class="fas fa-calendar-alt"></i>
-                        <h3>Next Quarter</h3>
-                    </div>
-                    <div class="prediction-content">
-                        <div class="prediction-metric">
-                            <span class="metric-label">Expected Reach:</span>
-                            <span class="metric-value" id="predictedReach90">0</span>
-                        </div>
-                        <div class="prediction-metric">
-                            <span class="metric-label">Expected Engagement:</span>
-                            <span class="metric-value" id="predictedEngagement90">0</span>
-                        </div>
-                        <div class="prediction-metric">
-                            <span class="metric-label">Success Probability:</span>
-                            <span class="metric-value" id="successProb90">0%</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="prediction-card">
-                    <div class="prediction-header">
-                        <i class="fas fa-chart-line"></i>
-                        <h3>Trend Analysis</h3>
-                    </div>
-                    <div class="prediction-content">
-                        <div class="trend-indicator">
-                            <span class="trend-label">Current Trend:</span>
-                            <span class="trend-value positive" id="currentTrend">↗️ Growing</span>
-                        </div>
-                        <div class="trend-indicator">
-                            <span class="trend-label">Peak Season:</span>
-                            <span class="trend-value" id="peakSeason">Q4 2024</span>
-                        </div>
-                        <div class="trend-indicator">
-                            <span class="trend-label">Optimization Window:</span>
-                            <span class="trend-value" id="optimizationWindow">2 weeks</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Action Items -->
-        <section class="card action-items fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-tasks"></i> Recommended Actions
-                </h2>
-                <p>AI-generated action items to improve your campaign performance</p>
-            </div>
-            
-            <div class="actions-list" id="actionItems">
-                <!-- Action items will be populated here -->
-            </div>
-        </section>
-    </div>
 
     <!-- Footer -->
     <footer class="footer">
@@ -414,6 +127,82 @@
         // Analysis page specific JavaScript
         let charts = {};
         let currentCampaignData = null;
+        
+        // Loading functions (in case main.js functions are not available)
+        function showLoading(message = 'Loading...') {
+            // Reuse existing overlay if present
+            let loadingDiv = document.getElementById('loadingOverlay');
+            if (!loadingDiv) {
+                loadingDiv = document.createElement('div');
+                loadingDiv.id = 'loadingOverlay';
+            }
+            loadingDiv.innerHTML = `
+                <div class="loading-overlay">
+                    <div class="loading-content">
+                        <div class="loading"></div>
+                        <p>${message}</p>
+                    </div>
+                </div>
+            `;
+            loadingDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(15, 23, 42, 0.35);
+                backdrop-filter: blur(6px);
+                -webkit-backdrop-filter: blur(6px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            `;
+            // Auto-timeout cleanup to avoid stuck overlay in edge cases
+            loadingDiv.setAttribute('data-created-at', String(Date.now()));
+            setTimeout(() => {
+                const el = document.getElementById('loadingOverlay');
+                if (el) {
+                    el.remove();
+                }
+            }, 60000);
+
+            if (!document.body.contains(loadingDiv)) {
+                document.body.appendChild(loadingDiv);
+            }
+        }
+
+        function hideLoading() {
+            const overlays = document.querySelectorAll('#loadingOverlay');
+            overlays.forEach(el => el.remove());
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#8b5cf6'};
+                color: white;
+                border-radius: 8px;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        function showError(message) {
+            showNotification(message, 'error');
+        }
         
         // Sample data for demonstration
         const sampleData = {
@@ -842,6 +631,1188 @@
             }
             return num.toString();
         }
+
+        // Analysis Form Handling
+        let campaignIdMap = {}; // Store campaign name to ID mapping
+        let lastAnalysisContext = { campaignId: null, analysisType: null };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCampaignsForAnalysis();
+            
+            // Add form submit handler
+            document.getElementById('analysisForm').addEventListener('submit', handleAnalysisSubmit);
+            
+            // Wire summary button
+            const summaryBtn = document.getElementById('summaryBtn');
+            if (summaryBtn) {
+                summaryBtn.addEventListener('click', handleGenerateSummary);
+            }
+        });
+
+        async function handleGenerateSummary() {
+            try {
+                const campaignId = lastAnalysisContext.campaignId;
+                const analysisType = lastAnalysisContext.analysisType;
+                if (!campaignId || !analysisType) {
+                    showError('Run an analysis first');
+                    return;
+                }
+                showLoading('Generating AI summary...');
+                const resp = await fetch('/api/analysis_summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ campaign_id: campaignId, analysis_type: analysisType })
+                });
+                const data = await resp.json();
+                if (!data.success) {
+                    showError(data.message || 'Failed to generate summary');
+                    return;
+                }
+                const sumDiv = document.getElementById('analysisSummary');
+                sumDiv.style.display = 'block';
+                sumDiv.innerHTML = renderSummaryBlock(data.summary, analysisType);
+                showNotification('Summary generated', 'success');
+            } catch (e) {
+                console.error('Summary error:', e);
+                showError('Failed to generate summary');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderSummaryBlock(summary, analysisType) {
+            if (typeof summary === 'string') {
+                return `<h3 style="margin-bottom:0.5rem">AI Summary</h3><p>${summary}</p>`;
+            }
+            try {
+                const pretty = JSON.stringify(summary, null, 2);
+                return `<h3 style="margin-bottom:0.5rem">AI Summary</h3><pre class="code-block">${pretty}</pre>`;
+            } catch {
+                return `<h3 style="margin-bottom:0.5rem">AI Summary</h3><pre class="code-block">${summary}</pre>`;
+            }
+        }
+
+        async function handleAnalysisSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const campaignName = formData.get('campaign_name');
+            const analysisType = formData.get('analysis_type');
+            
+            // Get campaign ID from the mapping
+            const campaignId = campaignIdMap[campaignName];
+            
+            if (!campaignId) {
+                showError('Please select a valid campaign');
+                return;
+            }
+            
+            const payload = {
+                campaign_id: campaignId,
+                analysis_type: analysisType
+            };
+
+            try {
+                showLoading('Analyzing campaign data...');
+                console.log('Payload:', payload);
+                
+                const response = await fetch('/api/analyze_campaign', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                console.log('Result:', result);
+                
+                if (result.success) {
+                    // Store context for summary
+                    lastAnalysisContext = { campaignId, analysisType };
+                    
+                    displayAnalysisResults(result.analysis, analysisType);
+                    showNotification('Analysis completed successfully!', 'success');
+                } else {
+                    showError(result.message || 'Analysis failed');
+                }
+            } catch (error) {
+                console.error('Error analyzing campaign:', error);
+                showError('An error occurred while analyzing the campaign');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayAnalysisResults(analysis, analysisType) {
+            const resultsSection = document.getElementById('analysisResults');
+            const contentDiv = document.getElementById('analysisContent');
+            
+            if (!resultsSection || !contentDiv) {
+                console.error('Required DOM elements not found:', { resultsSection, contentDiv });
+                showError('Display elements not found. Please refresh the page.');
+                return;
+            }
+            
+            // Reset summary on new analysis
+            const sumDiv = document.getElementById('analysisSummary');
+            if (sumDiv) { sumDiv.style.display = 'none'; sumDiv.innerHTML = ''; }
+            
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+
+            console.log('Displaying analysis results:', { analysis, analysisType });
+
+            if (analysisType === 'campaign_performance') {
+                displayCampaignPerformance(analysis);
+            } else if (analysisType === 'influencer_performance') {
+                displayInfluencerPerformance(analysis);
+            } else if (analysisType === 'audience_insights') {
+                displayAudienceInsights(analysis);
+            } else {
+                console.error('Unknown analysis type:', analysisType);
+                showError('Unknown analysis type');
+            }
+        }
+
+        async function resolveInfluencerNames(res) {
+            try {
+                const ids = Array.from(new Set(res.map(r => r.influencer_id).filter(Boolean)));
+                if (!ids.length) return {};
+                const resp = await fetch('/api/influencer_lookup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+                const data = await resp.json();
+                if (data.success) return data.map || {};
+                return {};
+            } catch (e) {
+                console.warn('Name resolution failed:', e);
+                return {};
+            }
+        }
+
+        async function displayInfluencerPerformance(analysis) {
+            const contentDiv = document.getElementById('analysisContent');
+            const res = analysis.outputs?.res || [];
+            
+            if (!res || res.length === 0) {
+                contentDiv.innerHTML = '<p class="text-center">No influencer performance data available.</p>';
+                return;
+            }
+
+            // Resolve names
+            const idMap = await resolveInfluencerNames(res);
+
+            // Calculate totals and averages
+            const totals = res.reduce((acc, item) => {
+                acc.impressions += parseInt(item.impressions) || 0;
+                acc.reach += parseInt(item.reach) || 0;
+                acc.engagements += parseInt(item.engagements) || 0;
+                acc.clicks += parseInt(item.clicks) || 0;
+                acc.conversions += parseInt(item.conversions) || 0;
+                acc.spend += parseFloat(item.spend) || 0;
+                acc.engagement_rate += parseFloat(item.engagement_rate) || 0;
+                return acc;
+            }, { impressions: 0, reach: 0, engagements: 0, clicks: 0, conversions: 0, spend: 0, engagement_rate: 0 });
+
+            const avgEngagementRate = totals.engagement_rate / res.length;
+            const avgCpc = totals.clicks > 0 ? totals.spend / totals.clicks : 0;
+            const avgCpa = totals.conversions > 0 ? totals.spend / totals.conversions : 0;
+            const avgRoi = totals.spend > 0 ? (totals.conversions * 25) / totals.spend : 0;
+
+            contentDiv.innerHTML = `
+                <!-- Influencer Performance Overview -->
+                <div class="performance-overview">
+                    <h3>Influencer Performance Overview</h3>
+                    <div class="metrics-grid compact metric-group">
+                        ${metricCard('Average Engagement Rate', `${avgEngagementRate.toFixed(2)}%`, 'fa-percent', true)}
+                        ${metricCard('Average CPC', `$${avgCpc.toFixed(2)}`, 'fa-mouse-pointer', true)}
+                        ${metricCard('Average CPA', `$${avgCpa.toFixed(2)}`, 'fa-user-check', true)}
+                        ${metricCard('ROI', `${avgRoi.toFixed(2)}x`, 'fa-chart-line', true)}
+                    </div>
+                </div>
+
+                <!-- Summary KPIs -->
+                <div class="performance-metrics">
+                    <h3>Totals</h3>
+                    <div class="metrics-grid compact metric-group">
+                        ${metricCard('Total Impressions', formatNumber(totals.impressions), 'fa-eye', true)}
+                        ${metricCard('Total Reach', formatNumber(totals.reach), 'fa-users', true)}
+                        ${metricCard('Total Engagements', formatNumber(totals.engagements), 'fa-heart', true)}
+                        ${metricCard('Total Clicks', formatNumber(totals.clicks), 'fa-mouse-pointer', true)}
+                        ${metricCard('Total Conversions', formatNumber(totals.conversions), 'fa-chart-line', true)}
+                        ${metricCard('Total Spend', `$${totals.spend.toFixed(2)}`, 'fa-dollar-sign', true)}
+                    </div>
+                </div>
+
+                <!-- Influencer Performance Charts -->
+                <div class="performance-charts">
+                    <h3>Influencer Performance Analysis</h3>
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h4>Engagement Rate by Influencer</h4>
+                            <canvas id="influencerEngagementChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Reach vs Impressions</h4>
+                            <canvas id="influencerReachImpressionsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Cost Efficiency (CPC vs CPA)</h4>
+                            <canvas id="influencerCostChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Performance Distribution</h4>
+                            <canvas id="influencerPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Performers -->
+                <div class="top-performers">
+                    <h3>Top Performing Influencers</h3>
+                    <div class="performers-grid">
+                        ${res
+                            .sort((a, b) => parseFloat(b.engagement_rate) - parseFloat(a.engagement_rate))
+                            .slice(0, 3)
+                            .map((influencer, index) => `
+                                <div class="performer-card">
+                                    <div class="performer-rank">#${index + 1}</div>
+                                    <div class="performer-info">
+                                        <h4>${idMap[String(influencer.influencer_id)] || `Influencer ${influencer.influencer_id}`}</h4>
+                                        <div class="performer-stats">
+                                            <div class="stat">
+                                                <span class="stat-label">Engagement Rate:</span>
+                                                <span class="stat-value">${parseFloat(influencer.engagement_rate).toFixed(2)}%</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">Reach:</span>
+                                                <span class="stat-value">${formatNumber(parseInt(influencer.reach))}</span>
+                                            </div>
+                                            <div class="stat">
+                                                <span class="stat-label">Conversions:</span>
+                                                <span class="stat-value">${formatNumber(parseInt(influencer.conversions))}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                    </div>
+                </div>
+
+                <!-- Detailed Influencer Table -->
+                <div class="performance-table">
+                    <h3>Detailed Influencer Performance</h3>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Influencer</th>
+                                    <th>Impressions</th>
+                                    <th>Reach</th>
+                                    <th>Engagements</th>
+                                    <th>Clicks</th>
+                                    <th>Conversions</th>
+                                    <th>Engagement Rate</th>
+                                    <th>Spend</th>
+                                    <th>CPC</th>
+                                    <th>CPA</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${res.map(item => {
+                                    const cpc = parseFloat(item.spend) / parseInt(item.clicks);
+                                    const cpa = parseFloat(item.spend) / parseInt(item.conversions);
+                                    const name = idMap[String(item.influencer_id)] || `Influencer ${item.influencer_id}`;
+                                    const username = (name || '').toLowerCase().replace(/\s+/g,'_');
+                                    return `
+                                        <tr>
+                                            <td>${name}</td>
+                                            <td>${formatNumber(parseInt(item.impressions))}</td>
+                                            <td>${formatNumber(parseInt(item.reach))}</td>
+                                            <td>${formatNumber(parseInt(item.engagements))}</td>
+                                            <td>${formatNumber(parseInt(item.clicks))}</td>
+                                            <td>${formatNumber(parseInt(item.conversions))}</td>
+                                            <td>${parseFloat(item.engagement_rate).toFixed(2)}%</td>
+                                            <td>$${parseFloat(item.spend).toFixed(2)}</td>
+                                            <td>$${cpc.toFixed(2)}</td>
+                                            <td>$${cpa.toFixed(2)}</td>
+                                            <td>${new Date(item.report_date).toLocaleDateString()}</td>
+                                            <td>
+                                                <button class="btn btn-secondary btn-small" onclick="openEmailModal('${name.replace(/'/g, "&#39;")}', '${username}')">
+                                                    <i class="fas fa-envelope"></i> Email
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Email Modal -->
+                <div id="emailModal" class="email-modal">
+                    <div class="email-modal-content">
+                        <div class="email-modal-header">
+                            <div class="email-modal-title">Send Email</div>
+                            <button class="email-modal-close" onclick="closeEmailModal()">&times;</button>
+                        </div>
+                        <div class="email-modal-body">
+                            <div class="email-form-group">
+                                <label class="email-form-label" for="email_to">To</label>
+                                <input id="email_to" class="email-form-input" placeholder="recipient@example.com" />
+                            </div>
+                            <div class="email-form-group">
+                                <label class="email-form-label" for="email_subject">Subject</label>
+                                <input id="email_subject" class="email-form-input" placeholder="Subject" />
+                            </div>
+                            <div class="email-form-group">
+                                <label class="email-form-label" for="email_body">Body</label>
+                                <textarea id="email_body" class="email-form-input email-form-textarea" placeholder="Email body..."></textarea>
+                            </div>
+                            <div class="email-preview">
+                                <div class="email-preview-header">Preview</div>
+                                <div id="email_preview" class="email-preview-content"></div>
+                            </div>
+                        </div>
+                        <div class="email-form-actions">
+                            <button class="email-btn email-btn-secondary" onclick="closeEmailModal()">Cancel</button>
+                            <button id="emailSendBtn" class="email-btn email-btn-primary" onclick="sendEmailSimple()">
+                                <span class="email-loading" style="display:none"></span>Send Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Create charts after DOM is updated
+            setTimeout(() => {
+                createInfluencerPerformanceCharts(res, idMap);
+            }, 100);
+        }
+
+        function metricCard(label, value, icon, compact) {
+            const cls = compact ? 'metric-card compact' : 'metric-card';
+            return `
+                <div class="${cls}">
+                    <div class="overview-icon">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div class="overview-content">
+                        <div class="metric-value">${value}</div>
+                        <div class="metric-label">${label}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createInfluencerPerformanceCharts(data, idMap) {
+            const labels = data.map(item => idMap[String(item.influencer_id)] || `Influencer ${item.influencer_id}`);
+            const engagementRates = data.map(item => parseFloat(item.engagement_rate));
+            const reach = data.map(item => parseInt(item.reach));
+            const impressions = data.map(item => parseInt(item.impressions));
+            const clicks = data.map(item => parseInt(item.clicks));
+            const conversions = data.map(item => parseInt(item.conversions));
+            const spend = data.map(item => parseFloat(item.spend));
+
+            // Engagement Rate Chart
+            const engagementCtx = document.getElementById('influencerEngagementChart');
+            if (engagementCtx) {
+                new Chart(engagementCtx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Engagement Rate (%)',
+                            data: engagementRates,
+                            backgroundColor: '#8b5cf6',
+                            borderColor: '#7c3aed',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a1a1aa' } },
+                            x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a1a1aa' } }
+                        }
+                    }
+                });
+            }
+
+            // Reach vs Impressions Chart
+            const reachImpressionsCtx = document.getElementById('influencerReachImpressionsChart');
+            if (reachImpressionsCtx) {
+                new Chart(reachImpressionsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: 'Reach', data: reach, backgroundColor: '#10b981', borderColor: '#059669', borderWidth: 1 },
+                            { label: 'Impressions', data: impressions, backgroundColor: '#3b82f6', borderColor: '#2563eb', borderWidth: 1 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'top', labels: { color: '#a1a1aa' } } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a1a1aa' } },
+                            x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a1a1aa' } }
+                        }
+                    }
+                });
+            }
+
+            // Cost Efficiency Chart
+            const costCtx = document.getElementById('influencerCostChart');
+            if (costCtx) {
+                const cpc = data.map(item => parseFloat(item.spend) / parseInt(item.clicks));
+                const cpa = data.map(item => parseFloat(item.spend) / parseInt(item.conversions));
+                
+                new Chart(costCtx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: 'Cost Per Click', data: cpc, borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', tension: 0.4 },
+                            { label: 'Cost Per Acquisition', data: cpa, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.4 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'top', labels: { color: '#a1a1aa' } } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a1a1aa' } },
+                            x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a1a1aa' } }
+                        }
+                    }
+                });
+            }
+
+            // Performance Distribution Chart
+            const performanceCtx = document.getElementById('influencerPerformanceChart');
+            if (performanceCtx) {
+                const performanceScores = data.map(item => (parseFloat(item.engagement_rate) * 0.4 + (parseInt(item.conversions) / Math.max(1, parseInt(item.reach)) * 100) * 0.6));
+                
+                new Chart(performanceCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data: performanceScores,
+                            backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'bottom', labels: { color: '#a1a1aa' } } }
+                    }
+                });
+            }
+        }
+
+        function displayCampaignPerformance(analysis) {
+            const contentDiv = document.getElementById('analysisContent');
+            if (!contentDiv) return;
+            const res = analysis?.outputs?.res || [];
+            if (!Array.isArray(res) || res.length === 0) {
+                contentDiv.innerHTML = '<p class="text-center">No campaign performance data available.</p>';
+                return;
+            }
+
+            const totals = res.reduce((acc, item) => {
+                acc.impressions += Number(item.impressions) || 0;
+                acc.reach += Number(item.reach) || 0;
+                acc.engagements += Number(item.engagements) || 0;
+                acc.clicks += Number(item.clicks) || 0;
+                acc.conversions += Number(item.conversions) || 0;
+                acc.spend += Number(item.spend) || 0;
+                return acc;
+            }, { impressions:0, reach:0, engagements:0, clicks:0, conversions:0, spend:0 });
+
+            const avgCpc = totals.clicks ? totals.spend / totals.clicks : 0;
+            const avgCpa = totals.conversions ? totals.spend / totals.conversions : 0;
+            const avgRoi = totals.spend ? ((totals.conversions * 25) / totals.spend) : 0;
+            const ctr = totals.impressions ? (totals.clicks / totals.impressions) * 100 : 0;
+
+            contentDiv.innerHTML = `
+                <div class="performance-overview">
+                    <h3>Campaign Performance Overview</h3>
+                    <div class="metrics-grid compact metric-group">
+                        ${metricCard('Total Impressions', formatNumber(totals.impressions), 'fa-eye', true)}
+                        ${metricCard('Total Reach', formatNumber(totals.reach), 'fa-users', true)}
+                        ${metricCard('Total Engagements', formatNumber(totals.engagements), 'fa-heart', true)}
+                        ${metricCard('Total Clicks', formatNumber(totals.clicks), 'fa-mouse-pointer', true)}
+                        ${metricCard('Total Conversions', formatNumber(totals.conversions), 'fa-chart-line', true)}
+                        ${metricCard('Total Spend', `$${totals.spend.toFixed(2)}`, 'fa-dollar-sign', true)}
+                    </div>
+                </div>
+                <div class="performance-metrics">
+                    <h3>Key Metrics</h3>
+                    <div class="metrics-grid compact metric-group">
+                        ${metricCard('Average CPC', `$${avgCpc.toFixed(2)}`, 'fa-circle-dot', true)}
+                        ${metricCard('Average CPA', `$${avgCpa.toFixed(2)}`, 'fa-user-check', true)}
+                        ${metricCard('ROI', `${avgRoi.toFixed(2)}x`, 'fa-arrow-trend-up', true)}
+                        ${metricCard('CTR', `${ctr.toFixed(2)}%`, 'fa-percentage', true)}
+                    </div>
+                </div>
+                <div class="performance-charts">
+                    <h3>Performance Trends</h3>
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h4>Engagements Over Time</h4>
+                            <canvas id="engagementsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Reach vs Impressions</h4>
+                            <canvas id="reachImpressionsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Cost Metrics</h4>
+                            <canvas id="costMetricsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Conversion Rate</h4>
+                            <canvas id="conversionRateChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="performance-table">
+                    <h3>Detailed Performance Data</h3>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Impressions</th>
+                                    <th>Reach</th>
+                                    <th>Engagements</th>
+                                    <th>Clicks</th>
+                                    <th>Conversions</th>
+                                    <th>Spend</th>
+                                    <th>CPC</th>
+                                    <th>CPA</th>
+                                    <th>ROI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${res.map(item => `
+                                    <tr>
+                                        <td>${new Date(item.report_date).toLocaleDateString()}</td>
+                                        <td>${formatNumber(Number(item.impressions)||0)}</td>
+                                        <td>${formatNumber(Number(item.reach)||0)}</td>
+                                        <td>${formatNumber(Number(item.engagements)||0)}</td>
+                                        <td>${formatNumber(Number(item.clicks)||0)}</td>
+                                        <td>${formatNumber(Number(item.conversions)||0)}</td>
+                                        <td>$${Number(item.spend||0).toFixed(2)}</td>
+                                        <td>$${Number(item.cpc||0).toFixed(2)}</td>
+                                        <td>$${Number(item.cpa||0).toFixed(2)}</td>
+                                        <td>${Number(item.roi||0).toFixed(2)}x</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => createCampaignPerformanceCharts(res), 100);
+        }
+
+        function createCampaignPerformanceCharts(data) {
+            const dates = data.map(d => new Date(d.report_date).toLocaleDateString());
+            const engagements = data.map(d => Number(d.engagements)||0);
+            const reach = data.map(d => Number(d.reach)||0);
+            const impressions = data.map(d => Number(d.impressions)||0);
+            const clicks = data.map(d => Number(d.clicks)||0);
+            const conversions = data.map(d => Number(d.conversions)||0);
+            const cpc = data.map(d => Number(d.cpc)||0);
+            const cpa = data.map(d => Number(d.cpa)||0);
+
+            const engagementsCtx = document.getElementById('engagementsChart');
+            if (engagementsCtx) {
+                new Chart(engagementsCtx, { type:'line', data:{ labels: dates, datasets:[{ label:'Engagements', data: engagements, borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.1)', tension:0.4 }] }, options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ color:'#a1a1aa' }, grid:{ color:'rgba(255,255,255,0.1)'} }, x:{ ticks:{ color:'#a1a1aa' }, grid:{ color:'rgba(255,255,255,0.1)'} } } } });
+            }
+
+            const reachImpCtx = document.getElementById('reachImpressionsChart');
+            if (reachImpCtx) {
+                new Chart(reachImpCtx, { type:'bar', data:{ labels: dates, datasets:[ { label:'Reach', data: reach, backgroundColor:'#10b981', borderColor:'#059669', borderWidth:1 }, { label:'Impressions', data: impressions, backgroundColor:'#3b82f6', borderColor:'#2563eb', borderWidth:1 } ] }, options:{ responsive:true, plugins:{ legend:{ position:'top', labels:{ color:'#a1a1aa'} } }, scales:{ y:{ beginAtZero:true, ticks:{ color:'#a1a1aa' }, grid:{ color:'rgba(255,255,255,0.1)'} }, x:{ ticks:{ color:'#a1a1aa' }, grid:{ color:'rgba(255,255,255,0.1)'} } } } });
+            }
+
+            const costCtx = document.getElementById('costMetricsChart');
+            if (costCtx) {
+                new Chart(costCtx, { type:'line', data:{ labels: dates, datasets:[ { label:'CPC', data: cpc, borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', tension:0.4 }, { label:'CPA', data: cpa, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', tension:0.4 } ] }, options:{ responsive:true, plugins:{ legend:{ position:'top', labels:{ color:'#a1a1aa'} } }, scales:{ y:{ beginAtZero:true, ticks:{ color:'#a1a1aa' }, grid:{ color:'rgba(255,255,255,0.1)'} }, x:{ ticks:{ color:'#a1a1aa' }, grid:{ color:'rgba(255,255,255,0.1)'} } } } });
+            }
+
+            const convCtx = document.getElementById('conversionRateChart');
+            if (convCtx) {
+                const convRate = data.map(d => {
+                    const clicks = Number(d.clicks)||0; const conv = Number(d.conversions)||0; return clicks ? (conv/clicks*100).toFixed(2) : 0; });
+                new Chart(convCtx, { type:'doughnut', data:{ labels: dates, datasets:[{ data: convRate, backgroundColor:['#10b981','#3b82f6','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#84cc16','#f97316','#ec4899','#6366f1'] }] }, options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{ color:'#a1a1aa'} } } } });
+            }
+        }
+
+        function displayAudienceInsights(analysis) {
+            const contentDiv = document.getElementById('analysisContent');
+            const res = analysis.outputs?.res || [];
+            
+            if (!res || res.length === 0) {
+                contentDiv.innerHTML = '<p class="text-center">No audience insights data available.</p>';
+                return;
+            }
+
+            const audienceData = res[0]; // Assuming single audience data object
+
+            contentDiv.innerHTML = `
+                <!-- Audience Overview -->
+                <div class="audience-overview">
+                    <h3>Audience Demographics & Behavior</h3>
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <div class="overview-icon">
+                                <i class="fas fa-venus-mars"></i>
+                            </div>
+                            <div class="overview-content">
+                                <div class="overview-value">${audienceData.gender_distribution}</div>
+                                <div class="overview-label">Gender Distribution</div>
+                            </div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="overview-content">
+                                <div class="overview-value">${audienceData.avg_income_level}</div>
+                                <div class="overview-label">Average Income Level</div>
+                            </div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="overview-content">
+                                <div class="overview-value">${audienceData.device_usage}</div>
+                                <div class="overview-label">Device Usage</div>
+                            </div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="overview-content">
+                                <div class="overview-value">${audienceData.location_top_countries}</div>
+                                <div class="overview-label">Top Countries</div>
+                            </div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-icon">
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                            <div class="overview-content">
+                                <div class="overview-value">${audienceData.age_group}</div>
+                                <div class="overview-label">Age Group</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audience Insights Charts -->
+                <div class="audience-charts">
+                    <h3>Audience Analysis</h3>
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h4>Gender Distribution</h4>
+                            <canvas id="genderChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Device Usage</h4>
+                            <canvas id="deviceChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Geographic Distribution</h4>
+                            <canvas id="locationChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Income Level Analysis</h4>
+                            <canvas id="incomeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audience Insights -->
+                <div class="audience-insights">
+                    <h3>Key Audience Insights</h3>
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <i class="fas fa-venus-mars"></i>
+                                <h4>Gender Targeting</h4>
+                            </div>
+                            <div class="insight-content">
+                                <p>Your audience is predominantly <strong>${audienceData.gender_distribution.split('/')[0].trim()}</strong>. 
+                                Consider tailoring content and messaging to better resonate with this demographic.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <i class="fas fa-mobile-alt"></i>
+                                <h4>Mobile-First Strategy</h4>
+                            </div>
+                            <div class="insight-content">
+                                <p>With <strong>${audienceData.device_usage.split(',')[0]}</strong> of your audience on mobile, 
+                                ensure all content is optimized for mobile viewing and interaction.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <i class="fas fa-globe"></i>
+                                <h4>Geographic Focus</h4>
+                            </div>
+                            <div class="insight-content">
+                                <p>Your top markets are <strong>${audienceData.location_top_countries}</strong>. 
+                                Consider localizing content and timing posts for these regions.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <div class="insight-header">
+                                <i class="fas fa-dollar-sign"></i>
+                                <h4>Income-Based Targeting</h4>
+                            </div>
+                            <div class="insight-content">
+                                <p>Your audience has an average income of <strong>${audienceData.avg_income_level}</strong>. 
+                                Adjust pricing strategies and product recommendations accordingly.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="audience-recommendations">
+                    <h3>Strategic Recommendations</h3>
+                    <div class="recommendations-list">
+                        <div class="recommendation-item">
+                            <div class="recommendation-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="recommendation-content">
+                                <h4>Content Strategy</h4>
+                                <p>Focus on creating mobile-optimized content that appeals to ${audienceData.age_group} age group, 
+                                with messaging that resonates with ${audienceData.gender_distribution.split('/')[0].trim()} audience.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="recommendation-item">
+                            <div class="recommendation-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="recommendation-content">
+                                <h4>Timing Optimization</h4>
+                                <p>Schedule posts during peak hours for ${audienceData.location_top_countries.split(',')[0]} timezone 
+                                to maximize engagement with your primary audience.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="recommendation-item">
+                            <div class="recommendation-icon">
+                                <i class="fas fa-tags"></i>
+                            </div>
+                            <div class="recommendation-content">
+                                <h4>Pricing Strategy</h4>
+                                <p>With an average income of ${audienceData.avg_income_level}, consider offering 
+                                flexible payment options and value-focused product bundles.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Create charts after DOM is updated
+            setTimeout(() => {
+                createAudienceInsightsCharts(audienceData);
+            }, 100);
+        }
+
+        function createAudienceInsightsCharts(audienceData) {
+            // Gender Distribution Chart
+            const genderCtx = document.getElementById('genderChart');
+            if (genderCtx) {
+                const genderParts = audienceData.gender_distribution.split('/');
+                const femalePercent = parseInt(genderParts[0]);
+                const malePercent = parseInt(genderParts[1]);
+                
+                new Chart(genderCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Female', 'Male'],
+                        datasets: [{
+                            data: [femalePercent, malePercent],
+                            backgroundColor: ['#ec4899', '#3b82f6'],
+                            borderWidth: 2,
+                            borderColor: '#1f2937'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#a1a1aa' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Device Usage Chart
+            const deviceCtx = document.getElementById('deviceChart');
+            if (deviceCtx) {
+                const deviceParts = audienceData.device_usage.split(',');
+                const mobilePercent = parseInt(deviceParts[0]);
+                const desktopPercent = parseInt(deviceParts[1]);
+                
+                new Chart(deviceCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Mobile', 'Desktop'],
+                        datasets: [{
+                            data: [mobilePercent, desktopPercent],
+                            backgroundColor: ['#10b981', '#8b5cf6'],
+                            borderWidth: 2,
+                            borderColor: '#1f2937'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#a1a1aa' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Geographic Distribution Chart
+            const locationCtx = document.getElementById('locationChart');
+            if (locationCtx) {
+                const countries = audienceData.location_top_countries.split(',');
+                const countryData = countries.map((country, index) => ({
+                    country: country.trim(),
+                    percentage: 100 - (index * 20) // Simple distribution
+                }));
+                
+                new Chart(locationCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: countryData.map(item => item.country),
+                        datasets: [{
+                            label: 'Audience Distribution (%)',
+                            data: countryData.map(item => item.percentage),
+                            backgroundColor: '#f59e0b',
+                            borderColor: '#d97706',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#a1a1aa' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#a1a1aa' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Income Level Chart
+            const incomeCtx = document.getElementById('incomeChart');
+            if (incomeCtx) {
+                const incomeRange = audienceData.avg_income_level;
+                
+                new Chart(incomeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Income Level'],
+                        datasets: [{
+                            label: 'Average Income',
+                            data: [1], // Placeholder for visualization
+                            backgroundColor: '#06b6d4',
+                            borderColor: '#0891b2',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Income Level: ${incomeRange}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 1,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { 
+                                    color: '#a1a1aa',
+                                    callback: function() {
+                                        return incomeRange;
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#a1a1aa' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        async function loadCampaignsForAnalysis() {
+            try {
+                const response = await fetch('/api/list_campaigns');
+                const data = await response.json();
+                if (!data.success || !data.campaigns) {
+                    console.warn('No campaigns returned:', data);
+                    return;
+                }
+                const select = document.getElementById('campaignName');
+                if (!select) return;
+                select.innerHTML = '<option value="">Select a campaign...</option>';
+                // Reset mapping
+                campaignIdMap = {};
+                (data.campaigns || []).forEach((c) => {
+                    const isObj = c && typeof c === 'object';
+                    const id = isObj ? (c.campaign_id || c.id || c.campaignId || c.ID) : String(c);
+                    const name = isObj ? (c.campaign_name || c.name || c.title || id) : String(c);
+                    if (!id) return;
+                    campaignIdMap[String(name)] = String(id);
+                    const opt = document.createElement('option');
+                    opt.value = String(name);
+                    opt.textContent = String(name);
+                    select.appendChild(opt);
+                });
+                console.log('Campaigns loaded. Mapping:', campaignIdMap);
+            } catch (err) {
+                console.error('Failed to load campaigns:', err);
+            }
+        }
+
+        // Email Modal Functions
+        const emailModal = document.getElementById('emailModal');
+        const emailToInput = document.getElementById('email_to');
+        const emailSubjectInput = document.getElementById('email_subject');
+        const emailBodyInput = document.getElementById('email_body');
+        const emailPreviewDiv = document.getElementById('email_preview');
+        const emailSendBtn = document.getElementById('emailSendBtn');
+        const emailLoadingSpan = emailSendBtn.querySelector('.email-loading');
+
+        function openEmailModal(name, username) {
+            emailToInput.value = `${name.replace(/_/g, ' ')} <${username}@example.com>`; // Example email format
+            emailSubjectInput.value = `Re: Campaign Performance with ${name}`;
+            emailBodyInput.value = `Hi ${name},\n\nHere's a summary of your campaign performance:\n\n`;
+            emailPreviewDiv.innerHTML = ''; // Clear previous preview
+            emailModal.style.display = 'block';
+        }
+
+        function closeEmailModal() {
+            emailModal.style.display = 'none';
+            emailToInput.value = '';
+            emailSubjectInput.value = '';
+            emailBodyInput.value = '';
+            emailPreviewDiv.innerHTML = '';
+            emailSendBtn.disabled = false;
+            emailLoadingSpan.style.display = 'none';
+        }
+
+        async function generateEmailPreview() {
+            const to = emailToInput.value;
+            const subject = emailSubjectInput.value;
+            const body = emailBodyInput.value;
+
+            if (!to || !subject || !body) {
+                showError('Please fill in all email fields.');
+                return;
+            }
+
+            emailSendBtn.disabled = true;
+            emailLoadingSpan.style.display = 'inline-block';
+            emailPreviewDiv.innerHTML = '<p>Generating email preview...</p>';
+
+            try {
+                const response = await fetch('/api/generate_email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to, subject, body })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    emailPreviewDiv.innerHTML = data.preview;
+                } else {
+                    emailPreviewDiv.innerHTML = `<p style="color: red;">Error generating email preview: ${data.message || 'Unknown error'}</p>`;
+                }
+            } catch (e) {
+                console.error('Error generating email preview:', e);
+                emailPreviewDiv.innerHTML = `<p style="color: red;">Error generating email preview: ${e.message || 'Unknown error'}</p>`;
+            } finally {
+                emailLoadingSpan.style.display = 'none';
+            }
+        }
+
+        async function sendEmail() {
+            const to = emailToInput.value;
+            const subject = emailSubjectInput.value;
+            const body = emailBodyInput.value;
+
+            if (!to || !subject || !body) {
+                showError('Please fill in all email fields.');
+                return;
+            }
+
+            emailSendBtn.disabled = true;
+            emailLoadingSpan.style.display = 'inline-block';
+            emailPreviewDiv.innerHTML = '<p>Sending email...</p>';
+
+            try {
+                const response = await fetch('/api/send_email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to, subject, body })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showNotification('Email sent successfully!', 'success');
+                    closeEmailModal();
+                } else {
+                    emailPreviewDiv.innerHTML = `<p style="color: red;">Error sending email: ${data.message || 'Unknown error'}</p>`;
+                }
+            } catch (e) {
+                console.error('Error sending email:', e);
+                emailPreviewDiv.innerHTML = `<p style="color: red;">Error sending email: ${e.message || 'Unknown error'}</p>`;
+            } finally {
+                emailLoadingSpan.style.display = 'none';
+            }
+        }
+
+        // Close modal if user clicks outside
+        window.onclick = function(event) {
+            if (event.target == emailModal) {
+                closeEmailModal();
+            }
+        }
+
+        // Email Modal Logic
+        let currentEmailContext = { campaignId: null, influencerName: '', influencerUsername: '' };
+
+        window.openEmailModal = async function(name, username) {
+            currentEmailContext = { campaignId: lastAnalysisContext.campaignId, influencerName: name, influencerUsername: username };
+            const modal = document.getElementById('emailModal');
+            if (!modal) return;
+            modal.classList.add('active');
+            // Prefill via generator
+            try {
+                showLoading('Generating email draft...');
+                const resp = await fetch('/api/generate_email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        campaign_id: currentEmailContext.campaignId,
+                        influencer_name: currentEmailContext.influencerName,
+                        influencer_username: currentEmailContext.influencerUsername
+                    })
+                });
+                const data = await resp.json();
+                if (data.success && data.email) {
+                    document.getElementById('email_to').value = data.email.email || '';
+                    document.getElementById('email_subject').value = data.email.subject || '';
+                    document.getElementById('email_body').value = data.email.body || '';
+                    document.getElementById('email_preview').textContent = data.email.body || '';
+                } else {
+                    showError(data.message || 'Failed to generate email');
+                }
+            } catch (e) {
+                console.error('Email generation error:', e);
+                showError('Failed to generate email');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        window.closeEmailModal = function() {
+            const modal = document.getElementById('emailModal');
+            if (!modal) return;
+            modal.classList.remove('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendBtn = document.getElementById('emailSendBtn');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', async function() {
+                    try {
+                        const mail_to = document.getElementById('email_to').value.trim();
+                        const subject = document.getElementById('email_subject').value.trim();
+                        const body = document.getElementById('email_body').value.trim();
+                        if (!mail_to || !subject || !body) {
+                            showError('Please fill all email fields');
+                            return;
+                        }
+                        this.disabled = true;
+                        this.querySelector('.email-loading').style.display = 'inline-block';
+                        const resp = await fetch('/api/send_email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ mail_to, subject, body })
+                        });
+                        const data = await resp.json();
+                        if (data.success) {
+                            showNotification('Email sent successfully', 'success');
+                            closeEmailModal();
+                        } else {
+                            showError(data.message || 'Failed to send email');
+                        }
+                    } catch (e) {
+                        console.error('Send email error:', e);
+                        showError('Failed to send email');
+                    } finally {
+                        this.disabled = false;
+                        this.querySelector('.email-loading').style.display = 'none';
+                    }
+                });
+            }
+            const bodyInput = document.getElementById('email_body');
+            if (bodyInput) {
+                bodyInput.addEventListener('input', function() {
+                    document.getElementById('email_preview').textContent = this.value;
+                });
+            }
+        });
     </script>
 </body>
 </html>

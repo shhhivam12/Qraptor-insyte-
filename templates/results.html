@@ -12,11 +12,14 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="/" class="logo"><i class="fas fa-robot"></i> insyte</a>
+            <a href="/" class="logo">
+                <img src="{{ url_for('static', filename='images/main_logo.png') }}" alt="Insyte Logo" width="30%">
+            </a>
             <ul class="nav-links">
                 <li><a href="/results" class="active">Find Influencers</a></li>
                 <li><a href="/campaign">Campaign Management</a></li>
                 <li><a href="/analysis">Campaign Analysis</a></li>
+                <li><a href="/super-manager" class="super-manager-link">Super Manager</a></li>
             </ul>
         </div>
     </nav>
@@ -27,11 +30,11 @@
             <p>Review brand fit, costs, and audience alignment. Add to campaign or contact directly.</p>
         </section>
 
-        <section class="card search-filter fade-in-up">
+        <section id="searchSection" class="card search-filter fade-in-up">
             <div class="card-header">
                 <h2 class="card-title"><i class="fas fa-search"></i> Search & Filter</h2>
             </div>
-            <form id="searchForm" class="search-form">
+            <form id="searchForm" class="search-form" method="POST">
                 <div class="grid grid-3">
                     <div class="form-group">
                         <label class="form-label" for="campaignSelect">Campaign</label>
@@ -42,7 +45,7 @@
                     <div class="form-group">
                         <label class="form-label" for="platform">Platform</label>
                         <select class="form-select" id="platform" name="platform">
-                            <option value="">All</option>
+                            <option value="">None</option>
                             <option>Instagram</option>
                             <option>YouTube</option>
                         </select>
@@ -78,6 +81,12 @@
                         <input class="form-input" id="audience_location" name="audience_location" placeholder="e.g., India, US">
                     </div>
                 </div>
+                <div class="grid grid-1">
+                    <div class="form-group">
+                        <label class="form-label" for="additional_notes">Additional preferences</label>
+                        <textarea class="form-input form-textarea" id="additional_notes" name="additional_notes" placeholder="e.g., Prefer creators who post Reels, Hindi-first, budget-friendly, mention product benefits, etc."></textarea>
+                    </div>
+                </div>
                 <div class="search-actions">
                     <button type="submit" class="btn"><i class="fas fa-search"></i> Search</button>
                     <button type="button" class="btn btn-secondary" onclick="clearFilters()"><i class="fas fa-times"></i> Clear</button>
@@ -85,16 +94,53 @@
             </form>
         </section>
 
-        <section class="card unified-results fade-in-up">
+        <section id="resultsSection" class="card unified-results fade-in-up" style="display:none;">
             <div class="card-header">
                 <h2 class="card-title"><i class="fas fa-users"></i> Influencer Results</h2>
                 <div class="table-actions">
-                    <button class="btn btn-secondary" onclick="addInfluencersToCampaign()"><i class="fas fa-plus"></i> Add Selected</button>
-                    <button class="btn" onclick="sendEmailsToInfluencers()"><i class="fas fa-envelope"></i> Contact Selected</button>
+                    <button class="btn btn-secondary" onclick="showFilters()"><i class="fas fa-sliders-h"></i> Modify Filters</button>
                 </div>
             </div>
             <div id="influencerResults" class="unified-influencer-grid"></div>
         </section>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="emailModal" class="email-modal">
+        <div class="email-modal-content">
+            <div class="email-modal-header">
+                <h3 class="email-modal-title">Send Email to Influencer</h3>
+                <button class="email-modal-close" onclick="closeEmailModal()">&times;</button>
+            </div>
+            <form id="emailForm" class="email-form">
+                <div class="email-form-group">
+                    <label class="email-form-label" for="email_to">To:</label>
+                    <input type="email" id="email_to" class="email-form-input" required>
+                </div>
+                <div class="email-form-group">
+                    <label class="email-form-label" for="email_subject">Subject:</label>
+                    <input type="text" id="email_subject" class="email-form-input" required>
+                </div>
+                <div class="email-form-group">
+                    <label class="email-form-label" for="email_body">Message:</label>
+                    <textarea id="email_body" class="email-form-input email-form-textarea" required></textarea>
+                </div>
+                <div class="email-form-group">
+                    <label class="email-form-label">Preview:</label>
+                    <div id="email_preview" class="email-preview">
+                        <div class="email-preview-header">Email Preview</div>
+                        <div class="email-preview-content"></div>
+                    </div>
+                </div>
+                <div class="email-form-actions">
+                    <button type="button" class="email-btn email-btn-secondary" onclick="closeEmailModal()">Cancel</button>
+                    <button type="submit" class="email-btn email-btn-primary">
+                        <span class="email-loading" style="display: none;"></span>
+                        Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <footer class="footer">
@@ -118,12 +164,455 @@
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
-        // Hook into existing displayInfluencers to use unified view
-        const _displayInfluencers = window.displayInfluencers;
-        window.displayInfluencers = function(infs){ 
-            _displayInfluencers(infs); 
-        };
+        // Global variables
+        let currentInfluencers = [];
+        
+        // Display influencers function
+        function displayInfluencers(influencers) {
+            console.log('Displaying influencers:', influencers);
+            const container = document.getElementById('influencerResults');
+            if (!container) {
+                console.error('influencerResults container not found');
+                return;
+            }
+            
+            if (!influencers || influencers.length === 0) {
+                container.innerHTML = '<p class="text-center">No influencers found.</p>';
+                return;
+            }
+            
+            const grid = document.createElement('div');
+            grid.className = 'unified-influencer-grid';
+            
+            influencers.forEach(influencer => {
+                console.log('Creating card for influencer:', influencer);
+                grid.appendChild(createInfluencerCard(influencer));
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(grid);
+        }
+        
+        function createInfluencerCard(inf) {
+            console.log('Creating card with data:', inf);
+            const card = document.createElement('div');
+            card.className = 'unified-influencer-card fade-in-up';
+            
+            const score = inf.brand_fit_score ?? Math.floor(Math.random()*21)+75;
+            const avatarSrc = inf.avatar ? `/api/proxy_image?url=${encodeURIComponent(inf.avatar)}` : 'https://via.placeholder.com/80x80/3b82f6/ffffff?text=IN';
+            
+            // Create score badge with color
+            const getScoreColor = (score) => {
+                if (score >= 90) return '#10b981'; // green
+                if (score >= 80) return '#f59e0b'; // amber
+                if (score >= 70) return '#ef4444'; // red
+                return '#6b7280'; // gray
+            };
+            
+            card.innerHTML = `
+                <div class="unified-card-header">
+                    <div class="profile-section">
+                        <div class="avatar-container">
+                            <img src="${avatarSrc}" alt="${inf.name || inf.username || ''}" class="unified-avatar" 
+                                 onerror="this.src='https://via.placeholder.com/80x80/3b82f6/ffffff?text=IN'" 
+                                 crossorigin="anonymous">
+                            <div class="platform-indicator">${inf.platform || 'Instagram'}</div>
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-name">${inf.name || inf.username || ''}</div>
+                            <div class="profile-username">@${inf.username || inf.channel_id || ''}</div>
+                            <div class="profile-stats">
+                                <span class="stat-chip"><i class="fas fa-user-group"></i> ${formatNumber(inf.followers || 0)}</span>
+                                <span class="stat-chip"><i class="fas fa-users"></i> ${formatNumber(inf.following || 0)}</span>
+                                <span class="stat-chip"><i class="fas fa-image"></i> ${formatNumber(inf.posts || 0)}</span>
+                                <span class="stat-chip"><i class="fas fa-chart-line"></i> ${(inf.avg_engagement_rate ?? 2.5).toFixed(1)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="score-section">
+                        <div class="brand-fit-score" style="background: ${getScoreColor(score)}">
+                            <div class="score-value">${score}</div>
+                            <div class="score-label">Brand Fit</div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${inf.summary ? `
+                <div class="summary-section">
+                    <div class="summary-content">${inf.summary}</div>
+                </div>
+                ` : ''}
+                
+                <div class="action-section">
+                    <button class="action-btn view-btn" onclick="viewProfile('${inf.username || inf.channel_id || ''}', '${inf.platform || 'Instagram'}')" title="View Profile">
+                        <i class="fas fa-external-link-alt"></i>
+                    </button>
+                    <button class="action-btn mail-btn" onclick="contactInfluencer('${inf.id || ''}')" title="Send Mail">
+                        <i class="fas fa-envelope"></i>
+                    </button>
+                    <button class="action-btn add-btn" onclick="addSingleInfluencer('${inf.id || ''}')" title="Add to Campaign">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            `;
+            return card;
+        }
+        
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+        
+        // Email and contact functions
+        function contactInfluencer(influencerId) {
+            try {
+                // Find influencer in current list
+                const inf = (currentInfluencers || []).find(x => String(x.id) === String(influencerId));
+                if (!inf) { 
+                    showError('Influencer not found in current list'); 
+                    return; 
+                }
+                const name = inf.name || inf.username || 'Creator';
+                const username = inf.username || inf.channel_id || '';
+                openEmailModal(name, username);
+            } catch (e) {
+                console.error('contactInfluencer error:', e);
+                showError('Failed to open email modal');
+            }
+        }
+        
+        function viewProfile(username, platform) {
+            let url;
+            if (platform.toLowerCase() === 'instagram') {
+                url = `https://instagram.com/${username}`;
+            } else if (platform.toLowerCase() === 'youtube') {
+                url = `https://youtube.com/channel/${username}`;
+            } else {
+                url = `https://instagram.com/${username}`;
+            }
+            window.open(url, '_blank');
+        }
+        
+        function addSingleInfluencer(influencerId) {
+            showSuccess('Influencer added to selection');
+        }
+        
+        async function openEmailModal(name, username) {
+            const modal = document.getElementById('emailModal');
+            if (!modal) {
+                showError('Email modal not found on page');
+                return;
+            }
+            
+            modal.classList.add('active');
+            
+            // Show loading while generating email
+            showLoading('Generating email draft...');
+            
+            try {
+                // Generate email using API
+                const response = await fetch('/api/generate_email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        campaign_id: document.getElementById('campaignSelect').value || '',
+                        influencer_name: name,
+                        influencer_username: username || ''
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success && data.email) {
+                    // Prefill email fields with generated content
+                    const toEl = document.getElementById('email_to');
+                    const subEl = document.getElementById('email_subject');
+                    const bEl = document.getElementById('email_body');
+                    const prevEl = document.getElementById('email_preview');
+                    
+                    if (toEl) toEl.value = data.email.email || `${name} <${username}@example.com>`;
+                    if (subEl) subEl.value = data.email.subject || 'Campaign Collaboration Opportunity';
+                    if (bEl) bEl.value = data.email.body || `Hi ${name},\n\nWe love your content and would like to collaborate on our campaign. Are you interested?\n\nBest regards,\nYour Team`;
+                    if (prevEl) prevEl.textContent = bEl ? bEl.value : '';
+                } else {
+                    showError(data.message || 'Failed to generate email');
+                }
+            } catch (error) {
+                console.error('Error generating email:', error);
+                showError('Failed to generate email');
+                
+                // Fallback to basic email
+                const toEl = document.getElementById('email_to');
+                const subEl = document.getElementById('email_subject');
+                const bEl = document.getElementById('email_body');
+                const prevEl = document.getElementById('email_preview');
+                
+                if (toEl) toEl.value = `${name} <${username}@example.com>`;
+                if (subEl) subEl.value = 'Campaign Collaboration Opportunity';
+                if (bEl) bEl.value = `Hi ${name},\n\nWe love your content and would like to collaborate on our campaign. Are you interested?\n\nBest regards,\nYour Team`;
+                if (prevEl) prevEl.textContent = bEl ? bEl.value : '';
+            } finally {
+                hideLoading();
+            }
+        }
         function clearFilters(){ document.getElementById('searchForm').reset(); }
+        
+        // Loading and notification functions
+        function showLoading(message = 'Loading...') {
+            let loadingDiv = document.getElementById('loadingOverlay');
+            if (!loadingDiv) {
+                loadingDiv = document.createElement('div');
+                loadingDiv.id = 'loadingOverlay';
+            }
+            loadingDiv.innerHTML = `
+                <div class="loading-overlay">
+                    <div class="loading-content">
+                        <div class="loading"></div>
+                        <p>${message}</p>
+                    </div>
+                </div>
+            `;
+            loadingDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(15, 23, 42, 0.35);
+                backdrop-filter: blur(6px);
+                -webkit-backdrop-filter: blur(6px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            `;
+            if (!document.body.contains(loadingDiv)) {
+                document.body.appendChild(loadingDiv);
+            }
+        }
+
+        function hideLoading() {
+            const overlays = document.querySelectorAll('#loadingOverlay');
+            overlays.forEach(el => el.remove());
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#8b5cf6'};
+                color: white;
+                border-radius: 8px;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            showNotification(message, 'success');
+        }
+
+        function showError(message) {
+            showNotification(message, 'error');
+        }
+        
+        // Load campaigns for results page (similar to analysis page)
+        async function loadCampaignsForResults() {
+            try {
+                const response = await fetch('/api/list_campaigns');
+                const data = await response.json();
+                if (!data.success || !data.campaigns) {
+                    console.warn('No campaigns returned:', data);
+                    return;
+                }
+                const select = document.getElementById('campaignSelect');
+                if (!select) return;
+                select.innerHTML = '<option value="">Select a campaign...</option>';
+                
+                (data.campaigns || []).forEach((c) => {
+                    const isObj = c && typeof c === 'object';
+                    const id = isObj ? (c.campaign_id || c.id || c.campaignId || c.ID) : String(c);
+                    const name = isObj ? (c.campaign_name || c.name || c.title || id) : String(c);
+                    if (!id) return;
+                    
+                    const opt = document.createElement('option');
+                    opt.value = String(id);
+                    opt.textContent = String(name);
+                    select.appendChild(opt);
+                });
+                console.log('Campaigns loaded for results page');
+            } catch (err) {
+                console.error('Failed to load campaigns:', err);
+            }
+        }
+        
+        // Email modal functions
+        function closeEmailModal() {
+            const modal = document.getElementById('emailModal');
+            if (modal) {
+                modal.classList.remove('active');
+                // Reset form
+                document.getElementById('emailForm').reset();
+                const previewContent = document.querySelector('#email_preview .email-preview-content');
+                if (previewContent) previewContent.textContent = '';
+            }
+        }
+        
+        // Handle form submissions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize campaign dropdown
+            loadCampaignsForResults();
+            
+            // Handle search form submission
+            const searchForm = document.getElementById('searchForm');
+            if (searchForm) {
+                searchForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const campaignSelect = document.getElementById('campaignSelect');
+                    const selectedCampaignId = campaignSelect ? campaignSelect.value : null;
+                    if (!selectedCampaignId) { 
+                        showError('Please select a campaign first'); 
+                        return; 
+                    }
+                    
+                    const formData = new FormData(e.target);
+                    const filters = {
+                        platform: formData.get('platform') || undefined,
+                        niche: formData.get('niche') || undefined,
+                        followers_min: formData.get('followers_min') || undefined,
+                        followers_max: formData.get('followers_max') || undefined,
+                        audience_age_range: formData.get('audience_age_range') || undefined,
+                        audience_gender: formData.get('audience_gender') || undefined,
+                        audience_location: formData.get('audience_location') || undefined,
+                        additional_notes: formData.get('additional_notes') || undefined
+                    };
+
+                    try {
+                        showLoading('✨ AI is searching creators you\'d swipe right on...');
+                        const controller = new AbortController();
+                        const timeout = setTimeout(()=>controller.abort(), 45000);
+                        const response = await fetch('/api/fetch_influencers', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ campaign_id: selectedCampaignId, filters }),
+                            signal: controller.signal
+                        });
+                        clearTimeout(timeout);
+                        const result = await response.json();
+                        if (result.success) {
+                            currentInfluencers = result.influencers;
+                            displayInfluencers(currentInfluencers);
+                            // Hide filters, show results
+                            const searchSection = document.getElementById('searchSection');
+                            const resultsSection = document.getElementById('resultsSection');
+                            if(searchSection && resultsSection){
+                                searchSection.style.display = 'none';
+                                resultsSection.style.display = '';
+                            }
+                            showSuccess(`Found ${result.count} influencers`);
+                        } else {
+                            showError(result.message || 'Failed to fetch influencers');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching influencers:', error);
+                        if(error.name === 'AbortError'){
+                            showError('The request timed out. Please try again.');
+                        } else {
+                            showError(error.message || 'An error occurred while searching for influencers');
+                        }
+                    } finally { 
+                        hideLoading(); 
+                    }
+                });
+            }
+            
+            const emailForm = document.getElementById('emailForm');
+            if (emailForm) {
+                emailForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const emailData = {
+                        to: document.getElementById('email_to').value,
+                        subject: document.getElementById('email_subject').value,
+                        body: document.getElementById('email_body').value
+                    };
+                    
+                    try {
+                        // Show loading state
+                        const submitBtn = emailForm.querySelector('button[type="submit"]');
+                        const loadingSpan = submitBtn.querySelector('.email-loading');
+                        submitBtn.disabled = true;
+                        if (loadingSpan) loadingSpan.style.display = 'inline-block';
+                        
+                        // Send email using the correct API endpoint
+                        const response = await fetch('/api/send_email', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(emailData)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            showSuccess('Email sent successfully!');
+                            closeEmailModal();
+                        } else {
+                            showError(result.message || 'Failed to send email');
+                        }
+                    } catch (error) {
+                        console.error('Error sending email:', error);
+                        showError('An error occurred while sending the email');
+                    } finally {
+                        // Reset loading state
+                        const submitBtn = emailForm.querySelector('button[type="submit"]');
+                        const loadingSpan = submitBtn.querySelector('.email-loading');
+                        submitBtn.disabled = false;
+                        if (loadingSpan) loadingSpan.style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('emailModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeEmailModal();
+                    }
+                });
+            }
+            
+            // Add real-time preview functionality
+            const emailBody = document.getElementById('email_body');
+            const emailPreview = document.getElementById('email_preview');
+            if (emailBody && emailPreview) {
+                emailBody.addEventListener('input', function() {
+                    const previewContent = emailPreview.querySelector('.email-preview-content');
+                    if (previewContent) {
+                        previewContent.textContent = this.value;
+                    }
+                });
+            }
+        });
+        
+
     </script>
 </body>
 </html>

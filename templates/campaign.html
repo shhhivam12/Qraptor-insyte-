@@ -12,11 +12,14 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="/" class="logo"><i class="fas fa-robot"></i> insyte</a>
+            <a href="/" class="logo">
+                <img src="{{ url_for('static', filename='images/main_logo.png') }}" alt="Insyte Logo" width="30%">
+            </a>
             <ul class="nav-links">
                 <li><a href="/results">Find Influencers</a></li>
                 <li><a href="/campaign" class="active">Campaign Management</a></li>
                 <li><a href="/analysis">Campaign Analysis</a></li>
+                <li><a href="/super-manager" class="super-manager-link">Super Manager</a></li>
             </ul>
         </div>
     </nav>
@@ -33,7 +36,7 @@
                 <h2 class="card-title">
                     <i class="fas fa-list"></i> Existing Campaigns
                 </h2>
-                <button type="button" class="btn" onclick="showCreateForm()">
+                <button type="button" class="btn btn-primary" onclick="showCreateModal()">
                     <i class="fas fa-plus"></i> Create New Campaign
                 </button>
             </div>
@@ -44,13 +47,17 @@
                 </div>
             </div>
         </section>
+    </div>
 
-        <!-- Create Campaign Form (Hidden by default) -->
-        <form id="campaignForm" class="campaign-form fade-in-up" style="display: none;">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-flag"></i> Campaign Details</h2>
+    <!-- Create Campaign Modal -->
+    <div id="createCampaignModal" class="modal" style="display: none;">
+        <div class="modal-content campaign-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-flag"></i> Create New Campaign</h3>
+                <span class="close" onclick="hideCreateModal()">&times;</span>
                 </div>
+            <form id="campaignForm" class="campaign-form">
+                <div class="modal-body">
                 <div class="grid grid-2">
                     <div class="form-group">
                         <label class="form-label" for="campaign_name">Campaign Name *</label>
@@ -120,23 +127,45 @@
                         <label class="form-label">Created On</label>
                         <input class="form-input" value="Auto when created" disabled>
                     </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="saveAsDraft()">
+                        <i class="fas fa-save"></i> Save Draft
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i> Create Campaign
+                    </button>
+                </div>
+            </form>
                 </div>
             </div>
 
-            <div class="card submit-section">
-                <div class="submit-content">
-                    <div class="submit-info">
-                        <h3>Ready to launch?</h3>
-                        <p>insyte will generate brand‑fit insights and recommended creators.</p>
+    <!-- Campaign Details Modal -->
+    <div id="campaignDetailsModal" class="modal" style="display: none;">
+        <div class="modal-content campaign-details-modal">
+            <div class="modal-header">
+                <h3 id="modalCampaignName"><i class="fas fa-eye"></i> Campaign Details</h3>
+                <span class="close" onclick="hideCampaignDetailsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="campaignDetailsContent">
+                    <!-- Campaign details will be loaded here -->
                     </div>
-                    <div class="submit-actions">
-                        <button type="submit" class="btn btn-large"><i class="fas fa-rocket"></i> Create Campaign</button>
-                        <button type="button" class="btn btn-secondary" onclick="saveAsDraft()"><i class="fas fa-save"></i> Save Draft</button>
-                        <button type="button" class="btn btn-secondary" onclick="hideCreateForm()"><i class="fas fa-arrow-left"></i> Back to Campaigns</button>
+                <div id="campaignInfluencers" style="margin-top: 2rem;">
+                    <h4><i class="fas fa-users"></i> Campaign Influencers</h4>
+                    <div id="influencersList" class="influencers-grid">
+                        <!-- Influencers will be loaded here -->
                     </div>
                 </div>
             </div>
-        </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideCampaignDetailsModal()">Close</button>
+                <button type="button" class="btn btn-primary" id="editCampaignBtn">
+                    <i class="fas fa-edit"></i> Edit Campaign
+                </button>
+            </div>
+        </div>
     </div>
 
     <footer class="footer">
@@ -161,14 +190,25 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
         // Campaign management functions
-        function showCreateForm() {
-            document.getElementById('campaignForm').style.display = 'block';
-            document.querySelector('.page-header').scrollIntoView({ behavior: 'smooth' });
+        function showCreateModal() {
+            document.getElementById('createCampaignModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
         
-        function hideCreateForm() {
-            document.getElementById('campaignForm').style.display = 'none';
-            document.querySelector('.page-header').scrollIntoView({ behavior: 'smooth' });
+        function hideCreateModal() {
+            document.getElementById('createCampaignModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        function showCampaignDetailsModal(campaignId) {
+            document.getElementById('campaignDetailsModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            loadCampaignDetails(campaignId);
+        }
+        
+        function hideCampaignDetailsModal() {
+            document.getElementById('campaignDetailsModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
         
         function saveAsDraft(){
@@ -206,7 +246,7 @@
             }
             
             const campaignsGrid = document.createElement('div');
-            campaignsGrid.className = 'campaigns-grid';
+            campaignsGrid.className = 'campaigns-grid-improved';
             
             campaigns.forEach(campaign => {
                 const campaignCard = createCampaignCard(campaign);
@@ -219,42 +259,164 @@
         
         function createCampaignCard(campaign) {
             const card = document.createElement('div');
-            card.className = 'campaign-card fade-in-up';
+            card.className = 'campaign-card-improved fade-in-up';
             
             const createdDate = campaign.created_on ? new Date(campaign.created_on).toLocaleDateString() : 'Not specified';
+            const status = campaign.status || 'Active';
+            const statusClass = status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive';
             
             card.innerHTML = `
-                <div class="campaign-header">
+                <div class="campaign-card-header">
+                    <div class="campaign-title-section">
                     <h3 class="campaign-name">${campaign.campaign_name || 'Unnamed Campaign'}</h3>
-                    <span class="campaign-id">#${campaign.campaign_id}</span>
-                </div>
-                <div class="campaign-details">
-                    <div class="campaign-info">
-                        <p><strong>Brand:</strong> ${campaign.brand_name || 'Not specified'}</p>
-                        <p><strong>Goal:</strong> ${campaign.goal || 'Not specified'}</p>
-                        <p><strong>Niche:</strong> ${campaign.niche || 'Not specified'}</p>
-                        <p><strong>Platform:</strong> ${campaign.platform || 'Not specified'}</p>
-                        <p><strong>Budget:</strong> ₹${campaign.budget || 'Not specified'}</p>
-                        <p><strong>Target Audience:</strong> ${campaign.target_audience || 'Not specified'}</p>
-                        <p><strong>Created:</strong> ${createdDate}</p>
+                        <span class="campaign-id">#${campaign.campaign_id || 'N/A'}</span>
                     </div>
-                    <div class="campaign-actions">
-                        <button class="btn btn-secondary" onclick="viewCampaign(${campaign.campaign_id})">
-                            <i class="fas fa-eye"></i> View
+                    <div class="campaign-status">
+                        <span class="status-badge ${statusClass}">${status}</span>
+                    </div>
+                </div>
+                <div class="campaign-card-body">
+                    <div class="campaign-info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-building"></i>
+                            <span><strong>Brand:</strong> ${campaign.brand_name || 'Not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-bullseye"></i>
+                            <span><strong>Goal:</strong> ${campaign.goal || 'Not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-tags"></i>
+                            <span><strong>Niche:</strong> ${campaign.niche || 'Not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-globe"></i>
+                            <span><strong>Platform:</strong> ${campaign.platform || 'Not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-indian-rupee-sign"></i>
+                            <span><strong>Budget:</strong> ₹${campaign.budget || 'Not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span><strong>Target:</strong> ${campaign.target_audience || 'Not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span><strong>Created:</strong> ${createdDate}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="campaign-card-footer">
+                    <button class="btn btn-secondary" onclick="showCampaignDetailsModal('${campaign.campaign_id}')">
+                        <i class="fas fa-eye"></i> View Details
                         </button>
-                        <button class="btn" onclick="editCampaign(${campaign.campaign_id})">
+                    <button class="btn btn-primary" onclick="editCampaign('${campaign.campaign_id}')">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                    </div>
                 </div>
             `;
             
             return card;
         }
         
-        function viewCampaign(campaignId) {
-            // Navigate to results page with campaign ID
-            window.location.href = `/results?campaign_id=${campaignId}`;
+        async function loadCampaignDetails(campaignId) {
+            try {
+                // Load campaign details
+                const campaignResponse = await fetch(`/api/list_campaigns`);
+                const campaignData = await campaignResponse.json();
+                
+                if (campaignData.success && campaignData.campaigns) {
+                    const campaign = campaignData.campaigns.find(c => c.campaign_id == campaignId);
+                    if (campaign) {
+                        displayCampaignDetails(campaign);
+                        // Load influencers for this campaign
+                        await loadCampaignInfluencers(campaignId);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading campaign details:', error);
+                showNotification('Error loading campaign details', 'error');
+            }
+        }
+        
+        function displayCampaignDetails(campaign) {
+            const modalTitle = document.getElementById('modalCampaignName');
+            const detailsContent = document.getElementById('campaignDetailsContent');
+            
+            modalTitle.textContent = campaign.campaign_name || 'Campaign Details';
+            
+            const createdDate = campaign.created_on ? new Date(campaign.created_on).toLocaleDateString() : 'Not specified';
+            
+            detailsContent.innerHTML = `
+                <div class="campaign-details-grid">
+                    <div class="detail-section">
+                        <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Campaign ID:</span>
+                            <span class="detail-value">#${campaign.campaign_id || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Brand Name:</span>
+                            <span class="detail-value">${campaign.brand_name || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Goal:</span>
+                            <span class="detail-value">${campaign.goal || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Niche:</span>
+                            <span class="detail-value">${campaign.niche || 'Not specified'}</span>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <h4><i class="fas fa-settings"></i> Campaign Settings</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Platform:</span>
+                            <span class="detail-value">${campaign.platform || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Budget:</span>
+                            <span class="detail-value">₹${campaign.budget || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Target Audience:</span>
+                            <span class="detail-value">${campaign.target_audience || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Created On:</span>
+                            <span class="detail-value">${createdDate}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function loadCampaignInfluencers(campaignId) {
+            try {
+                // For now, we'll show a placeholder since we need to implement the API
+                const influencersList = document.getElementById('influencersList');
+                influencersList.innerHTML = `
+                    <div class="no-influencers">
+                        <i class="fas fa-users-slash"></i>
+                        <p>No influencers assigned to this campaign yet.</p>
+                        <button class="btn btn-primary" onclick="window.location.href='/results?campaign_id=${campaignId}'">
+                            <i class="fas fa-search"></i> Find Influencers
+                        </button>
+                    </div>
+                `;
+                
+                // TODO: Implement actual API call to get influencers for this campaign
+                // const response = await fetch(`/api/campaign_influencers/${campaignId}`);
+                // const data = await response.json();
+                // if (data.success && data.influencers) {
+                //     displayInfluencers(data.influencers);
+                // }
+            } catch (error) {
+                console.error('Error loading influencers:', error);
+                const influencersList = document.getElementById('influencersList');
+                influencersList.innerHTML = '<p class="text-error">Error loading influencers</p>';
+            }
         }
         
         function editCampaign(campaignId) {
@@ -335,9 +497,9 @@
                     // Clear draft
                     localStorage.removeItem('campaignDraft');
                     
-                    // Hide form and reload campaigns
+                    // Hide modal and reload campaigns
                     setTimeout(() => {
-                        hideCreateForm();
+                        hideCreateModal();
                         loadCampaigns();
                     }, 1500);
                 } else {

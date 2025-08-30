@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>insyte — Influencer Outreach & CRM Agent</title>
+    <title>Insyte — Influencer Outreach & CRM Agent</title>
     <meta name="description" content="insyte is an AI-powered influencer outreach and CRM agent, powered by QRaptor.">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.png') }}">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="logo">
-                <i class="fas fa-robot"></i> insyte
+                <img src="{{ url_for('static', filename='images/main_logo.png') }}" alt="Insyte Logo" width="30%">
             </a>
             <ul class="nav-links">
                 <li><a href="/results">Find Influencers</a></li>
                 <li><a href="/campaign">Campaign Management</a></li>
                 <li><a href="/analysis">Campaign Analysis</a></li>
+                <li><a href="/super-manager" class="super-manager-link">Super Manager</a></li>
             </ul>
         </div>
     </nav>
@@ -37,8 +39,9 @@
                 <span class="float-dot" style="top: 75%; left: 10%;" data-depth="0.26"></span>
             </div>
             <div class="hero-content">
-                <h1>insyte: Influencer Outreach & CRM Agent</h1>
-                <p>Smooth, modern, minimal interface for end‑to‑end influencer campaign creation, discovery, and outreach — powered by QRaptor.</p>
+                <img src="{{ url_for('static', filename='images/qrap-insyte.png') }}" alt="QraptorxInsyte Logo" width="20%" style="margin-bottom: 30px;">
+                <h1>Insyte: Influencer Outreach & CRM Agent</h1>
+                <p>Your one stop AI powered solution for finding influencers, creating campaigns, and managing outreach — powered by QRaptor.</p>
                 <div class="hero-buttons">
                     <a href="/campaign" class="btn btn-large">
                         <i class="fas fa-rocket"></i> Start a Campaign
@@ -50,186 +53,308 @@
             </div>
         </section>
 
-        <!-- Problem Statement -->
-        <section class="card fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-exclamation-triangle" style="color: var(--pink-accent);"></i> The Problem
-                </h2>
-            </div>
-            <p>Finding the right influencers and managing outreach is slow and error‑prone. insyte automates discovery, brand‑fit analysis, and CRM follow‑ups.</p>
-            <div class="grid grid-3">
-                <div class="problem-item slide-in-left">
-                    <i class="fas fa-clock fa-2x" style="color: var(--warning);"></i>
-                    <h4>Time‑Consuming</h4>
-                    <p>Manual research and communication overhead</p>
+        <!-- Problem Statement Section -->
+        <section class="problem-section fade-in-up">
+            <div class="section-container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--pink-accent);"></i>
+                        The Problem We Solve
+                    </h2>
+                    <p class="section-subtitle">Digital marketers and brand managers face critical challenges in influencer marketing</p>
                 </div>
-                <div class="problem-item fade-in-up" style="animation-delay: 0.2s;">
-                    <i class="fas fa-chart-line-down fa-2x" style="color: var(--error);"></i>
-                    <h4>Inconsistent Results</h4>
-                    <p>Low conversions and missed opportunities</p>
-                </div>
-                <div class="problem-item slide-in-right">
-                    <i class="fas fa-users fa-2x" style="color: var(--pink-accent);"></i>
-                    <h4>Poor Brand Fit</h4>
-                    <p>Misaligned creators and wasted budget</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Target Audience -->
-        <section class="card fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-bullseye" style="color: var(--pink-accent);"></i> Who Is This For?
-                </h2>
-            </div>
-            <div class="grid grid-2">
-                <div class="audience-card slide-in-left">
-                    <div class="audience-icon">
-                        <i class="fas fa-building"></i>
+                
+                <div class="problem-grid">
+                    <div class="problem-card slide-in-left">
+                        <div class="problem-icon">
+                            <i class="fas fa-clock fa-3x" style="color: var(--warning);"></i>
+                        </div>
+                        <h3>Wasted Time & Money</h3>
+                        <p>Brand managers and digital marketers waste countless hours and resources on influencers that aren't the right fit for their brand.</p>
                     </div>
-                    <h3>B2B & Enterprise</h3>
-                    <p>Run thought‑leadership and product launch campaigns with precision.</p>
-                </div>
-                <div class="audience-card slide-in-right">
-                    <div class="audience-icon">
-                        <i class="fas fa-shopping-bag"></i>
+                    
+                    <div class="problem-card fade-in-up" style="animation-delay: 0.2s;">
+                        <div class="problem-icon">
+                            <i class="fas fa-sitemap fa-3x" style="color: var(--error);"></i>
+                        </div>
+                        <h3>No Centralized Platform</h3>
+                        <p>There's no unified platform to track and manage digital marketing campaigns and influencers effectively.</p>
                     </div>
-                    <h3>E‑commerce & D2C</h3>
-                    <p>Find high‑fit creators to drive sales and measurable ROI.</p>
+                    
+                    <div class="problem-card slide-in-right">
+                        <div class="problem-icon">
+                            <i class="fas fa-chart-line fa-3x" style="color: var(--primary-purple);"></i>
+                        </div>
+                        <h3>Unorganized Operations</h3>
+                        <p>Outreach, analysis, and consulting processes are scattered and inefficient, leading to poor campaign performance.</p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- How It Works -->
-        <section id="how-it-works" class="card fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-cogs"></i> How It Works
-                </h2>
-            </div>
-            
-            <!-- Flow Diagram -->
-            <div class="flow-diagram">
-                <div class="flow-step">
-                    <div class="flow-icon">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="flow-label">Create Campaign</div>
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="how-it-works-section fade-in-up">
+            <div class="section-container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">
+                        <i class="fas fa-cogs" style="color: var(--primary-purple);"></i>
+                        How It Works
+                    </h2>
+                    <p class="section-subtitle">Your complete influencer marketing workflow in one platform</p>
                 </div>
-                <div class="flow-step">
-                    <div class="flow-icon">
-                        <i class="fas fa-search"></i>
+                
+                <div class="new-workflow-slider">
+                    <div class="slider-container">
+                        <div class="slide active" data-slide="1">
+                            <div class="slide-image">
+                                <img src="{{ url_for('static', filename='images/1.png') }}" alt="Create & Manage Campaigns">
+                            </div>
+                            <div class="slide-content">
+                                <h3>Create & Manage Campaigns</h3>
+                                <p>Set up your influencer marketing campaigns with detailed targeting and goals</p>
+                            </div>
+                        </div>
+                        
+                        <div class="slide" data-slide="2">
+                            <div class="slide-image">
+                                <img src="{{ url_for('static', filename='images/2.png') }}" alt="Find Perfect Influencers">
+                            </div>
+                            <div class="slide-content">
+                                <h3>Find Perfect Influencers</h3>
+                                <p>AI-powered discovery to find influencers that match your brand perfectly</p>
+                            </div>
+                        </div>
+                        
+                        <div class="slide" data-slide="3">
+                            <div class="slide-image">
+                                <img src="{{ url_for('static', filename='images/3.png') }}" alt="Outreach Influencers">
+                            </div>
+                            <div class="slide-content">
+                                <h3>Campaign Success</h3>
+                                <p>Track your campaign success and optimize for better results</p>
+                            </div>
+                        </div>
+                        
+                        <div class="slide" data-slide="4">
+                            <div class="slide-image">
+                                <img src="{{ url_for('static', filename='images/4.png') }}" alt="Analyze Performance">
+                            </div>
+                            <div class="slide-content">
+                                <h3>Outreach Influencers</h3>
+                                <p>Automated personalized outreach with AI-generated emails</p>
+                            </div>
+                        </div>
+                        
+                        <div class="slide" data-slide="5">
+                            <div class="slide-image">
+                                <img src="{{ url_for('static', filename='images/5.png') }}" alt="Consult Super Manager">
+                            </div>
+                            <div class="slide-content">
+                                <h3>Analyze Performance</h3>
+                                <p>Comprehensive campaign and influencer performance analytics</p>
+                            </div>
+                        </div>
+                        
+                        <div class="slide" data-slide="6">
+                            <div class="slide-image">
+                                <img src="{{ url_for('static', filename='images/6.png') }}" alt="Campaign Success">
+                            </div>
+                            <div class="slide-content">
+                                <h3>Consult Super Manager</h3>
+                                <p>Get AI-powered insights and recommendations for next steps</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flow-label">Discover Influencers</div>
-                </div>
-                <div class="flow-step">
-                    <div class="flow-icon">
-                        <i class="fas fa-chart-bar"></i>
+                    
+                    <div class="slider-nav">
+                        <button class="nav-btn prev" onclick="newSlide(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="nav-dots">
+                            <span class="nav-dot active" onclick="goToSlide(1)"></span>
+                            <span class="nav-dot" onclick="goToSlide(2)"></span>
+                            <span class="nav-dot" onclick="goToSlide(3)"></span>
+                            <span class="nav-dot" onclick="goToSlide(4)"></span>
+                            <span class="nav-dot" onclick="goToSlide(5)"></span>
+                            <span class="nav-dot" onclick="goToSlide(6)"></span>
+                        </div>
+                        <button class="nav-btn next" onclick="newSlide(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
-                    <div class="flow-label">Brand Fit Scoring</div>
-                </div>
-                <div class="flow-step">
-                    <div class="flow-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div class="flow-label">Outreach & CRM</div>
-                </div>
-                <div class="flow-step">
-                    <div class="flow-icon">
-                        <i class="fas fa-analytics"></i>
-                    </div>
-                    <div class="flow-label">Insights</div>
-                </div>
-            </div>
-
-            <div class="features">
-                <div class="feature-card slide-in-left">
-                    <div class="feature-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h3>AI Agents</h3>
-                    <p>Multi‑agent orchestration for campaign, discovery, fit, outreach, and analysis.</p>
-                </div>
-                <div class="feature-card fade-in-up" style="animation-delay: 0.3s;">
-                    <div class="feature-icon">
-                        <i class="fas fa-envelope-open"></i>
-                    </div>
-                    <h3>CRM‑Ready</h3>
-                    <p>Track contacts, responses, and follow‑ups seamlessly.</p>
-                </div>
-                <div class="feature-card slide-in-right">
-                    <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3>Powered by QRaptor</h3>
-                    <p>Secure, scalable agent orchestration under the hood.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Qraptor Platform Integration -->
-        <section class="card fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-plug"></i> Powered by QRaptor
-                </h2>
-            </div>
-            <div class="qraptor-integration">
-                <div class="qraptor-logo">
-                    <i class="fas fa-cube fa-4x" style="color: var(--primary-purple);"></i>
-                    <h3>AI Agent Orchestration</h3>
+        <!-- Technologies Section -->
+        <section class="technologies-section fade-in-up">
+            <div class="section-container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">
+                        <i class="fas fa-microchip" style="color: var(--secondary-purple);"></i>
+                        Technologies & Integration
+                    </h2>
+                    <p class="section-subtitle">Built with cutting-edge technologies for maximum performance</p>
                 </div>
-                <p>Auth‑token secured, multi‑agent pipelines, and reliable execution.</p>
+                
+                <div class="tech-grid">
+                    <div class="tech-category">
+                        <h3>Core Technologies</h3>
+                        <div class="tech-icons">
+                            <div class="tech-icon">
+                                <i class="fab fa-js-square fa-3x" style="color: #f7df1e;"></i>
+                                <span>JavaScript</span>
+                            </div>
+                            <div class="tech-icon">
+                                <i class="fab fa-python fa-3x" style="color: #3776ab;"></i>
+                                <span>Flask</span>
+                            </div>
+                            <div class="tech-icon">
+                                <img src="{{ url_for('static', filename='images/qraptor-logo.png') }}" alt="QRaptor" style="width: 80%; height: 48px;">
+                                <span>QRaptor</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tech-category">
+                        <h3>API Integrations</h3>
+                        <div class="tech-icons">
+                            <div class="tech-icon">
+                                <i class="fab fa-instagram fa-3x" style="color: #e4405f;"></i>
+                                <span>Instagram API</span>
+                            </div>
+                            <div class="tech-icon">
+                                <i class="fab fa-youtube fa-3x" style="color: #ff0000;"></i>
+                                <span>YouTube API</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="qraptor-usage">
+                    <h3>How QRaptor Powers Insyte</h3>
+                    <p class="section-subtitle" style="margin-top: -40px;margin-bottom: 20px;">Orchestrating 14 AI AGENTS to power the platform</p>
+                    <div class="usage-grid">
+                        <div class="usage-item">
+                            <i class="fas fa-brain fa-2x" style="color: var(--primary-purple);"></i>
+                            <h4>EDA Agents</h4>
+                            <p>Exploratory data analysis for campaign insights</p>
+                        </div>
+                        <div class="usage-item">
+                            <i class="fas fa-comments fa-2x" style="color: var(--secondary-purple);"></i>
+                            <h4>LLM Agents</h4>
+                            <p>Prompt your custom language model agents</p>
+                        </div>
+                        <div class="usage-item">
+                            <i class="fas fa-database fa-2x" style="color: var(--pink-accent);"></i>
+                            <h4>Database Management</h4>
+                            <p>Efficient data storage and retrieval systems</p>
+                        </div>
+                        <div class="usage-item">
+                            <i class="fas fa-envelope fa-2x" style="color: var(--success);"></i>
+                            <h4>SMTP Mailing</h4>
+                            <p>Automated email delivery and tracking</p>
+                        </div>
+                        <div class="usage-item">
+                            <i class="fas fa-download fa-2x" style="color: var(--warning);"></i>
+                            <h4>Data Fetching</h4>
+                            <p>Real-time Instagram and YouTube data collection</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Interactive Features Showcase -->
-        <section class="card fade-in-up">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-magic" style="color: var(--pink-accent);"></i> Interactive Experience
-                </h2>
-            </div>
-            <div class="interactive-showcase">
-                <div class="showcase-item slide-in-left">
-                    <div class="showcase-icon">
-                        <i class="fas fa-mouse-pointer"></i>
-                    </div>
-                    <h3>Mouse Parallax</h3>
-                    <p>Move your mouse around to see floating elements respond to your movement</p>
+        <!-- Features Section -->
+        <section class="features-section fade-in-up">
+            <div class="section-container">
+                <div class="section-header text-center">
+                    <h2 class="section-title">
+                        <i class="fas fa-star" style="color: var(--pink-accent);"></i>
+                        Powerful Features
+                    </h2>
+                    <p class="section-subtitle">Everything you need for successful influencer marketing campaigns</p>
                 </div>
-                <div class="showcase-item fade-in-up" style="animation-delay: 0.2s;">
-                    <div class="showcase-icon">
-                        <i class="fas fa-scroll"></i>
+                
+                <div class="features-grid">
+                    <div class="feature-card slide-in-left">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot fa"></i>
+                        </div>
+                        <h3>AI Super Manager</h3>
+                        <p>Talk to our AI about anything - campaign strategy, influencer selection, performance analysis, and get personalized recommendations.</p>
                     </div>
-                    <h3>Scroll Animations</h3>
-                    <p>Elements animate as you scroll through the page</p>
-                </div>
-                <div class="showcase-item slide-in-right">
-                    <div class="showcase-icon">
-                        <i class="fas fa-palette"></i>
+                    
+                    <div class="feature-card fade-in-up" style="animation-delay: 0.1s;">
+                        <div class="feature-icon">
+                            <i class="fas fa-search fa"></i>
+                        </div>
+                        <h3>Smart Influencer Discovery</h3>
+                        <p>AI-powered algorithms to find the perfect influencers that match your brand values and target audience.</p>
                     </div>
-                    <h3>Dynamic Colors</h3>
-                    <p>Beautiful gradient animations and glassy effects</p>
+                    
+                    <div class="feature-card slide-in-right">
+                        <div class="feature-icon">
+                            <i class="fas fa-tasks fa"></i>
+                        </div>
+                        <h3>Campaign Management</h3>
+                        <p>Create, organize, and track multiple influencer marketing campaigns from a single dashboard.</p>
+                    </div>
+                    
+                    <div class="feature-card slide-in-left" style="animation-delay: 0.2s;">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line fa"></i>
+                        </div>
+                        <h3>Performance Analytics</h3>
+                        <p>Comprehensive analysis of campaign performance, influencer engagement, and audience insights.</p>
+                    </div>
+                    
+                    <div class="feature-card fade-in-up" style="animation-delay: 0.3s;">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-alt fa"></i>
+                        </div>
+                        <h3>AI Summary Reports</h3>
+                        <p>Automatically generate intelligent summaries of your analysis with actionable insights and recommendations.</p>
+                    </div>
+                    
+                    <div class="feature-card slide-in-right" style="animation-delay: 0.4s;">
+                        <div class="feature-icon">
+                            <i class="fas fa-envelope-open-text fa"></i>
+                        </div>
+                        <h3>Personalized AI Emails</h3>
+                        <p>Generate customized outreach emails for each influencer based on their profile and your campaign goals.</p>
+                    </div>
+                    
+                    <div class="feature-card slide-in-left" style="animation-delay: 0.5s;">
+                        <div class="feature-icon">
+                            <i class="fas fa-paper-plane fa"></i>
+                        </div>
+                        <h3>Automated Outreach</h3>
+                        <p>Send personalized emails on your behalf with automated follow-ups and response tracking.</p>
+                    </div>
+                    
+                    <div class="feature-card slide-in-right" style="animation-delay: 0.6s;">
+                        <div class="feature-icon">
+                            <i class="fas fa-lightbulb fa"></i>
+                        </div>
+                        <h3>AI Business Planning</h3>
+                        <p>Get strategic insights and recommendations to plan your influencer marketing strategy with AI assistance.</p>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Call to Action -->
-        <section class="card fade-in-up">
-            <div class="card-header text-center">
-                <h2 class="card-title">Launch your next creator campaign with insyte</h2>
-            </div>
-            <div class="cta-content text-center">
-                <p>Minimal, readable, modern — built for speed and results.</p>
+        <section class="cta-section fade-in-up">
+            <div class="section-container text-center">
+                <h2 class="cta-title">Ready to Transform Your Influencer Marketing?</h2>
+                <p class="cta-subtitle">Join the future of AI-powered influencer outreach and campaign management</p>
                 <div class="cta-buttons">
                     <a href="/campaign" class="btn btn-large">
-                        <i class="fas fa-rocket"></i> Create Campaign
+                        <i class="fas fa-rocket"></i> Start Your Campaign
                     </a>
-                    <a href="/results" class="btn btn-secondary btn-large">
-                        <i class="fas fa-search"></i> Explore Influencers
+                    <a href="/super-manager" class="btn btn-secondary btn-large">
+                        <i class="fas fa-robot"></i> Talk to Super Manager
                     </a>
                 </div>
             </div>

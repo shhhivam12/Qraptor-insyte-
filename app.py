@@ -7,6 +7,7 @@ from datetime import datetime
 import uuid
 import re
 from bs4 import BeautifulSoup
+from config_keys import YOUTUBE_API_KEY
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
@@ -30,10 +31,20 @@ AGENT_ENDPOINTS = {
     'agent_3': '712',  # add influencers to campaign
     'agent_4': '703',  # fetch campaign data
     'agent_5': '709',  # send mails
-    'analysis_agent': '715'
+    'analysis_agent': '715',
+    'campaign_performance': '904',
+    'influencer_performance': '906',
+    'audience_insights': '907',
+    'campaign_summary': '964',
+    'influencer_summary': '965',
+    'audience_summary': '966',
+    'email_generator': '944',
+    'email_sender': '942',
+    'super_manager': '971'  # super manager chatbot
 }
 
 # Global variables to store data between agents
+campaign = {}
 campaign_data = {}
 influencer_data = []
 campaign_analysis = {}
@@ -141,6 +152,43 @@ def api_instagram_profile():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+def get_youtube_channel(channel_id: str, api_key: str = None) -> dict:
+    """Fetch YouTube channel details using YouTube Data API v3."""
+    key = api_key or os.getenv('YOUTUBE_API_KEY') or YOUTUBE_API_KEY
+    url = (
+        "https://www.googleapis.com/youtube/v3/channels"
+        f"?part=snippet,statistics&id={channel_id}&key={key}"
+    )
+    resp = requests.get(url, timeout=20)
+    data = resp.json()
+    if "items" in data and len(data["items"]) > 0:
+        ch = data["items"][0]
+        snippet = ch.get("snippet", {})
+        stats = ch.get("statistics", {})
+        return {
+            "channel_id": channel_id,
+            "channel_name": snippet.get("title"),
+            "description": snippet.get("description"),
+            "profile_picture": ((snippet.get("thumbnails") or {}).get("high") or {}).get("url"),
+            "country": snippet.get("country", "Not Available"),
+            "published_at": snippet.get("publishedAt"),
+            "subscriber_count": stats.get("subscriberCount"),
+            "video_count": stats.get("videoCount"),
+            "view_count": stats.get("viewCount"),
+        }
+    raise RuntimeError("Channel not found or invalid ID")
+
+@app.route('/api/youtube_channel', methods=['GET'])
+def api_youtube_channel():
+    try:
+        channel_id = request.args.get('channel_id', '').strip()
+        if not channel_id:
+            return jsonify({'success': False, 'message': 'channel_id is required'}), 400
+        info = get_youtube_channel(channel_id)
+        return jsonify({'success': True, 'channel': info})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @app.route('/api/proxy_image')
 def proxy_image():
     try:
@@ -237,6 +285,10 @@ def results():
 def analysis():
     return render_template('analysis.html')
 
+@app.route('/super-manager')
+def super_manager():
+    return render_template('super-manager.html')
+
 @app.route('/api/list_campaigns', methods=['GET'])
 def list_campaigns():
     try:
@@ -294,6 +346,9 @@ def list_campaigns():
                 return jsonify({'success': False, 'message': f'Failed to fetch campaigns: {str(e)}'}), 500
 
             if campaigns:
+                print(campaigns)
+                print(f"[CAMPAIGNS] Found {len(campaigns)} campaigns from QRaptor")
+                print(f"[CAMPAIGNS] Sample campaign structure: {campaigns[0] if campaigns else 'None'}")
                 return jsonify({'success': True, 'campaigns': campaigns})
             return jsonify({'success': False, 'message': 'No campaigns found'}), 404
         else:
@@ -459,11 +514,13 @@ def fetch_influencers():
                 username = str(item).lstrip('@').strip()
                 brand_fit_score = 85
                 summary = ''
-                
             if not username:
                 continue
                 
             platform_final = 'Instagram' if platform.startswith('insta') else ('YouTube' if 'you' in platform else 'Instagram')
+            # Heuristics: if looks like a YouTube Channel ID (UC...) or we were given a channel_id, force YouTube
+            if username.upper().startswith('UC') or item.get('channel_id'):
+                platform_final = 'YouTube'
             
             if platform_final == 'Instagram':
                 try:
@@ -501,19 +558,42 @@ def fetch_influencers():
                         'profile_url': f"https://instagram.com/{username}"
                     })
             else:
-                enriched.append({
-                    'id': f"yt_{username}",
-                    'platform': 'YouTube',
-                    'username': username,
-                    'name': username,
-                    'followers': 0,
-                    'following': 0,
-                    'posts': 0,
-                    'avatar': '',
-                    'brand_fit_score': brand_fit_score,
-                    'summary': summary,
-                    'avg_engagement_rate': 2.5
-                })
+                try:
+                    channel_id = item.get('channel_id') or username
+                    yt = get_youtube_channel(channel_id)
+                    enriched.append({
+                        'id': f"yt_{channel_id}",
+                        'platform': 'YouTube',
+                        'username': channel_id,
+                        'name': yt.get('channel_name') or channel_id,
+                        'followers': int(yt.get('subscriber_count') or 0),
+                        'following': 0,
+                        'posts': int(yt.get('video_count') or 0),
+                        'avatar': yt.get('profile_picture', ''),
+                        'brand_fit_score': brand_fit_score,
+                        'summary': summary or (yt.get('description') or ''),
+                        'avg_engagement_rate': 2.5,
+                        'profile_url': f"https://youtube.com/channel/{yt.get('channel_id') or channel_id}",
+                        'country': yt.get('country'),
+                        'view_count': int(yt.get('view_count') or 0),
+                        'published_at': yt.get('published_at')
+                    })
+                except Exception as e:
+                    print(f"YT enrich failed for {username}: {e}")
+                    enriched.append({
+                        'id': f"yt_{username}",
+                        'platform': 'YouTube',
+                        'username': username,
+                        'name': username,
+                        'followers': 0,
+                        'following': 0,
+                        'posts': 0,
+                        'avatar': '',
+                        'brand_fit_score': brand_fit_score,
+                        'summary': summary,
+                        'avg_engagement_rate': 2.5,
+                        'profile_url': f"https://youtube.com/channel/{username}"
+                    })
 
         global influencer_data
         influencer_data = enriched
@@ -530,7 +610,7 @@ def add_influencers():
         if campaign_id not in campaign_data:
             return jsonify({'success': False, 'message': 'Campaign not found'}), 404
         agent_input = {'campaign_id': campaign_id, 'influencer_ids': influencer_ids, 'action': 'add_influencers'}
-        result = qraptor_agent.call_agent('agent_3', agent_input)
+        result = call_agent('agent_3', agent_input)
         if result:
             return jsonify({'success': True, 'message': f'Added {len(influencer_ids)} influencers to campaign', 'agent_response': result})
         return jsonify({'success': False, 'message': 'Failed to add influencers via agent'}), 500
@@ -541,10 +621,11 @@ def add_influencers():
 def fetch_campaign_data():
     try:
         campaign_id = request.args.get('campaign_id')
+        print(f"[FETCH_CAMPAIGN_DATA] Received campaign_id: {campaign_id}")
         if not campaign_id or campaign_id not in campaign_data:
             return jsonify({'success': False, 'message': 'Campaign not found'}), 404
         agent_input = {'campaign_id': campaign_id, 'action': 'fetch_campaign_data'}
-        result = qraptor_agent.call_agent('agent_4', agent_input)
+        result = call_agent('agent_4', agent_input)
         if result:
             return jsonify({'success': True, 'campaign_data': result})
         return jsonify({'success': False, 'message': 'Failed to fetch campaign data via agent'}), 500
@@ -563,7 +644,7 @@ def send_emails():
         if campaign_id not in campaign_data:
             return jsonify({'success': False, 'message': 'Campaign not found'}), 404
         agent_input = {'campaign_id': campaign_id, 'influencer_ids': influencer_ids, 'email_template': email_template, 'action': 'send_emails'}
-        result = qraptor_agent.call_agent('agent_5', agent_input)
+        result = call_agent('agent_5', agent_input)
         if result:
             return jsonify({'success': True, 'message': f'Emails sent to {len(influencer_ids)} influencers', 'agent_response': result})
         return jsonify({'success': False, 'message': 'Failed to send emails via agent'}), 500
@@ -575,13 +656,39 @@ def analyze_campaign():
     try:
         data = request.json
         campaign_id = data.get('campaign_id')
-        if campaign_id not in campaign_data:
-            return jsonify({'success': False, 'message': 'Campaign not found'}), 404
-        analysis_input = {'campaign_id': campaign_id, 'action': 'analyze_campaign'}
-        result = qraptor_agent.call_agent('analysis_agent', analysis_input)
+        analysis_type = data.get('analysis_type')
+        
+        print(f"[ANALYSIS] Received campaign_id: {campaign_id}, analysis_type: {analysis_type}")
+        print(f"[ANALYSIS] Available campaign_data keys: {list(campaign_data.keys())}")
+        
+        if not campaign_id:
+            return jsonify({'success': False, 'message': 'Campaign ID is required'}), 400
+        
+        # if campaign_id not in campaign_data:
+        #     return jsonify({'success': False, 'message': 'Campaign not found'}), 404
+        
+        # Map analysis type to agent
+        agent_mapping = {
+            'campaign_performance': 'campaign_performance',
+            'influencer_performance': 'influencer_performance', 
+            'audience_insights': 'audience_insights'
+        }
+        
+        agent_name = agent_mapping.get(analysis_type)
+        if not agent_name:
+            return jsonify({'success': False, 'message': 'Invalid analysis type'}), 400
+        
+        
+        # Call QRaptor agent
+        analysis_input = {"campaign_id": campaign_id}
+        result = call_agent(AGENT_ENDPOINTS[agent_name], analysis_input)
+        print(result)
         if result:
             global campaign_analysis
             campaign_analysis[campaign_id] = result
+            global campaign 
+            campaign = result
+            print(campaign)
             return jsonify({'success': True, 'analysis': result})
         return jsonify({'success': False, 'message': 'Failed to analyze campaign via agent'}), 500
     except Exception as e:
@@ -590,6 +697,138 @@ def analyze_campaign():
 @app.route('/api/get_stored_data')
 def get_stored_data():
     return jsonify({'campaigns': campaign_data, 'influencers': influencer_data, 'analysis': campaign_analysis})
+
+@app.route('/api/analysis_summary', methods=['POST'])
+def analysis_summary():
+    try:
+        data = request.json
+        campaign_id = data.get('campaign_id')
+        analysis_type = data.get('analysis_type')
+        if not campaign_id or not analysis_type:
+            return jsonify({'success': False, 'message': 'campaign_id and analysis_type are required'}), 400
+        
+        mapping = {
+            'campaign_performance': 'campaign_summary',
+            'influencer_performance': 'influencer_summary',
+            'audience_insights': 'audience_summary'
+        }
+        agent_key = mapping.get(analysis_type)
+        if not agent_key:
+            return jsonify({'success': False, 'message': 'Invalid analysis type'}), 400
+        
+        print(AGENT_ENDPOINTS[agent_key])
+
+        result = call_agent(AGENT_ENDPOINTS[agent_key], {"query": campaign})
+        if not result:
+            return jsonify({'success': False, 'message': 'agent failed'}), 502
+        
+        outputs = result.get('outputs') or {}
+        summary = outputs.get('summary') or outputs.get('res') or outputs
+        return jsonify({'success': True, 'summary': summary, 'raw': result})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/influencer_lookup', methods=['POST'])
+def influencer_lookup():
+    try:
+        data = request.json or {}
+        ids = data.get('ids') or []
+        id_to_name = {}
+        # Build helper index once per request
+        try:
+            by_numeric_id = {}
+            by_generic_id = {}
+            for infl in influencer_data:
+                # Common shapes
+                num_id = infl.get('influencer_id')
+                gen_id = infl.get('id') or infl.get('username')
+                display = infl.get('name') or infl.get('username') or infl.get('id')
+                if num_id is not None:
+                    by_numeric_id[str(num_id)] = display
+                if gen_id is not None:
+                    by_generic_id[str(gen_id)] = display
+            for requested_id in ids:
+                s = str(requested_id)
+                name_found = by_numeric_id.get(s) or by_generic_id.get(s)
+                id_to_name[s] = name_found or f"Influencer {requested_id}"
+        except Exception:
+            for requested_id in ids:
+                id_to_name[str(requested_id)] = f"Influencer {requested_id}"
+        return jsonify({'success': True, 'map': id_to_name})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/generate_email', methods=['POST'])
+def generate_email():
+    try:
+        data = request.json or {}
+        campaign_id = data.get('campaign_id')
+        influencer_name = data.get('influencer_name')
+        influencer_username = data.get('influencer_username')
+        if not campaign_id or not influencer_name:
+            return jsonify({'success': False, 'message': 'campaign_id and influencer_name are required'}), 400
+        
+        payload = {
+            'campaign_data': campaign_data.get(campaign_id, {}),
+            'influencer_data': {
+                'name': influencer_name,
+                'username': influencer_username or ''
+            }
+        }
+        result = call_agent(AGENT_ENDPOINTS['email_generator'], payload)
+        if not result:
+            return jsonify({'success': False, 'message': 'Email generation failed'}), 502
+        outputs = result.get('outputs') or {}
+        email = {
+            'email': outputs.get('email', ''),
+            'subject': outputs.get('subject', ''),
+            'body': outputs.get('body', '')
+        }
+        return jsonify({'success': True, 'email': email, 'raw': result})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/send_email', methods=['POST'])
+def send_email():
+    try:
+        data = request.json or {}
+        mail_to = data.get('mail_to')
+        subject = data.get('subject')
+        body = data.get('body')
+        # if not mail_to or not subject or not body:
+        #     return jsonify({'success': False, 'message': 'mail_to, subject, and body are required'}), 400
+        payload = {
+            'mail_to': mail_to,
+            'subject': subject,
+            'body': body
+        }
+        result = call_agent(AGENT_ENDPOINTS['email_sender'], payload)
+        print(result)
+        # if result:
+        return jsonify({'success': True})
+        # return jsonify({'success': False, 'message': 'Failed to send email'}), 502
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/super-manager-chat', methods=['POST'])
+def super_manager_chat():
+    try:
+        data = request.json or {}
+        query = data.get('query')
+        if not query:
+            return jsonify({'success': False, 'message': 'query is required'}), 400
+        
+        payload = {"user_query": query}
+        print(payload)
+        result = call_agent(AGENT_ENDPOINTS['super_manager'], payload)
+        if not result:
+            return jsonify({'success': False, 'message': 'Super Manager agent failed to respond'}), 502
+        
+        outputs = result.get('outputs') or {}
+        response = outputs.get('response') or outputs.get('answer') or outputs.get('summary') or outputs.get('res') or outputs
+        return jsonify({'success': True, 'response': response, 'raw': result})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
