@@ -7,7 +7,6 @@ from datetime import datetime
 import uuid
 import re
 from bs4 import BeautifulSoup
-from config_keys import YOUTUBE_API_KEY
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
