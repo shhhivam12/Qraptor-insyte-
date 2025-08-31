@@ -295,12 +295,12 @@ def list_campaigns():
         token_url = "https://portal.qraptor.ai/auth1/realms/appzyjjakwlasqtu/protocol/openid-connect/token"
         
         payload = {
-            "username": "shimahen",
-            "password": "UY2Hh%dsM4",
-            "grant_type": "password",
-            "client_id": "application",
-            "client_secret": "OBtlzRYGsABo2iTzcXD0Wh14IBzLmuAY"
-        }
+        "username": os.getenv("QRAPTOR_USERNAME"),
+        "password": os.getenv("QRAPTOR_PASSWORD"),
+        "grant_type": "password",
+        "client_id": os.getenv("QRAPTOR_CLIENT_ID"),
+        "client_secret": os.getenv("QRAPTOR_CLIENT_SECRET")
+    }
         
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
@@ -381,12 +381,12 @@ def create_campaign():
             token_url = "https://portal.qraptor.ai/auth1/realms/appzyjjakwlasqtu/protocol/openid-connect/token"
             
             payload = {
-                "username": "shimahen",
-                "password": "UY2Hh%dsM4",
-                "grant_type": "password",
-                "client_id": "application",
-                "client_secret": "OBtlzRYGsABo2iTzcXD0Wh14IBzLmuAY"
-            }
+        "username": os.getenv("QRAPTOR_USERNAME"),
+        "password": os.getenv("QRAPTOR_PASSWORD"),
+        "grant_type": "password",
+        "client_id": os.getenv("QRAPTOR_CLIENT_ID"),
+        "client_secret": os.getenv("QRAPTOR_CLIENT_SECRET")
+    }
             
             headers = {"Content-Type": "application/x-www-form-urlencoded"}
             
@@ -453,12 +453,12 @@ def fetch_influencers():
         # Step 1: Get Access Token (exact flow)
         token_url = "https://portal.qraptor.ai/auth1/realms/appzyjjakwlasqtu/protocol/openid-connect/token"
         payload = {
-            "username": "shimahen",
-            "password": "UY2Hh%dsM4",
-            "grant_type": "password",
-            "client_id": "application",
-            "client_secret": "OBtlzRYGsABo2iTzcXD0Wh14IBzLmuAY"
-        }
+        "username": os.getenv("QRAPTOR_USERNAME"),
+        "password": os.getenv("QRAPTOR_PASSWORD"),
+        "grant_type": "password",
+        "client_id": os.getenv("QRAPTOR_CLIENT_ID"),
+        "client_secret": os.getenv("QRAPTOR_CLIENT_SECRET")
+    }
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         resp = requests.post(token_url, data=payload, headers=headers)
         if resp.status_code != 200:
