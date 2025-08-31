@@ -210,11 +210,11 @@ def proxy_image():
 def get_access_token():
     token_url = "https://portal.qraptor.ai/auth1/realms/appzyjjakwlasqtu/protocol/openid-connect/token"
     payload = {
-        "username": "shimahen",
-        "password": "UY2Hh%dsM4",
+        "username": os.getenv("QRAPTOR_USERNAME"),
+        "password": os.getenv("QRAPTOR_PASSWORD"),
         "grant_type": "password",
-        "client_id": "application",
-        "client_secret": "OBtlzRYGsABo2iTzcXD0Wh14IBzLmuAY"
+        "client_id": os.getenv("QRAPTOR_CLIENT_ID"),
+        "client_secret": os.getenv("QRAPTOR_CLIENT_SECRET")
     }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     response = requests.post(token_url, data=payload, headers=headers)
