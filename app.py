@@ -9,14 +9,14 @@ import re
 from bs4 import BeautifulSoup
 from flask_cors import CORS
 
+app = Flask(__name__)
+app.secret_key = 'your-secret-key-here'
+app.config['SESSION_TYPE'] = 'filesystem'
+
 CORS(app, resources={r"/*": {"origins": [
     "https://portal.qraptor.ai/",
     "https://appzyjjakwlasqtu.qraptor.ai/"
 ]}})
-
-app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'
-app.config['SESSION_TYPE'] = 'filesystem'
 
 # Log every incoming request (method, path) to help debug routing
 @app.before_request
