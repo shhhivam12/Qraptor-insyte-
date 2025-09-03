@@ -13,10 +13,22 @@ app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 app.config['SESSION_TYPE'] = 'filesystem'
 
-CORS(app, resources={r"/*": {"origins": [
+allowed_origins = [
     "https://portal.qraptor.ai/",
     "https://appzyjjakwlasqtu.qraptor.ai/"
-]}})
+]
+
+CORS(app, origins=allowed_origins, supports_credentials=True)
+
+@app.after_request
+def after_request(response):
+    origin = request.headers.get("Origin")
+    if origin in allowed_origins:
+        response.headers.add("Access-Control-Allow-Origin", origin)
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+    return response
+
 
 # Log every incoming request (method, path) to help debug routing
 @app.before_request
