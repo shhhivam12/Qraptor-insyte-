@@ -8,6 +8,11 @@ import uuid
 import re
 from bs4 import BeautifulSoup
 
+CORS(app, resources={r"/*": {"origins": [
+    "https://portal.qraptor.ai/",
+    "https://appzyjjakwlasqtu.qraptor.ai/"
+]}})
+
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 app.config['SESSION_TYPE'] = 'filesystem'
