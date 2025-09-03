@@ -7,6 +7,7 @@ from datetime import datetime
 import uuid
 import re
 from bs4 import BeautifulSoup
+from flask_cors import CORS
 
 CORS(app, resources={r"/*": {"origins": [
     "https://portal.qraptor.ai/",
