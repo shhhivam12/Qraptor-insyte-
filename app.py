@@ -19,6 +19,7 @@ allowed_origins = [
 ]
 
 CORS(app, resources={r"/": {"origins": ""}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 #CORS(app, origins=allowed_origins, supports_credentials=True)
 
 @app.after_request
