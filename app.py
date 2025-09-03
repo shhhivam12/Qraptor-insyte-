@@ -18,7 +18,8 @@ allowed_origins = [
     "https://appzyjjakwlasqtu.qraptor.ai/"
 ]
 
-CORS(app, origins=allowed_origins, supports_credentials=True)
+CORS(app, resources={r"/": {"origins": ""}})
+#CORS(app, origins=allowed_origins, supports_credentials=True)
 
 @app.after_request
 def after_request(response):
